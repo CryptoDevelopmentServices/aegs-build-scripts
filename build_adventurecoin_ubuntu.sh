@@ -44,7 +44,9 @@ sudo apt-get update
 sudo apt-get install -y build-essential libtool autotools-dev automake pkg-config libssl-dev \
 libevent-dev bsdmainutils python3 libminiupnpc-dev libzmq3-dev \
 libqt5gui5 libqt5core5a libqt5dbus5 qttools5-dev qttools5-dev-tools \
-libprotobuf-dev protobuf-compiler libqrencode-dev git curl fakeroot dpkg-dev imagemagick
+libprotobuf-dev protobuf-compiler libqrencode-dev git curl fakeroot dpkg-dev imagemagick \
+libboost-system-dev libboost-filesystem-dev libboost-program-options-dev \
+libboost-thread-dev libboost-chrono-dev
 
 # --------------------------
 # Berkeley DB 4.8
