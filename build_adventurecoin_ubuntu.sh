@@ -81,6 +81,7 @@ else
 fi
 
 cd AdventureCoin
+chmod +x autogen.sh
 ./autogen.sh
 
 CONFIGURE_ARGS="LDFLAGS=-L${BDB_PREFIX}/lib/ CPPFLAGS=-I${BDB_PREFIX}/include/"
