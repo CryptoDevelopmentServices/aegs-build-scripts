@@ -27,7 +27,7 @@ jobs:
           echo -e "2\ny\ny\ny\ny\ny" | ./build_adventurecoin_ubuntu.sh
 
       - name: Upload Binaries
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: compiled-wallets
           path: compiled_wallets/*
