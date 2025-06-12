@@ -1,0 +1,33 @@
+name: GitHub CI Builder
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Make Script Executable
+        run: chmod +x ./build_adventurecoin_ubuntu.sh
+
+      - name: Install Dependencies
+        run: sudo apt-get update && sudo apt-get install -y imagemagick
+
+      - name: Run Build Script Non-Interactively
+        run: |
+          echo -e "2\ny\ny\ny\ny\ny" | ./build_adventurecoin_ubuntu.sh
+
+      - name: Upload Binaries
+        uses: actions/upload-artifact@v3
+        with:
+          name: compiled-wallets
+          path: compiled_wallets/*
