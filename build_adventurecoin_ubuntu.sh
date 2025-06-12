@@ -55,11 +55,19 @@ if [ ! -d "db-4.8.30.NC" ]; then
     curl -LO 'http://download.oracle.com/berkeley-db/db-4.8.30.NC.tar.gz'
     tar -xzf db-4.8.30.NC.tar.gz
 fi
-cd db-4.8.30.NC/build_unix
+
+cd db-4.8.30.NC
+
+# Patch __atomic_compare_exchange for GCC 11+
+echo -e "${GREEN}>>> Patching Berkeley DB for GCC compatibility...${RESET}"
+sed -i 's/__atomic_compare_exchange/__db_atomic_compare_exchange/g' dbinc/atomic.h
+
+cd build_unix
 ../dist/configure --prefix="$BDB_PREFIX" --enable-cxx --disable-shared --with-pic
 make -j"$(nproc)"
 make install
 cd ../../
+
 
 # --------------------------
 # AdventureCoin source
