@@ -87,6 +87,8 @@ cd AdventureCoin
 echo -e "${GREEN}>>> Checking out update-to-compile-2204-2404 branch...${RESET}"
 git fetch origin
 git checkout update-to-compile-2204-2404
+
+chmod +x share/genbuild.sh
 chmod +x autogen.sh
 ./autogen.sh
 
