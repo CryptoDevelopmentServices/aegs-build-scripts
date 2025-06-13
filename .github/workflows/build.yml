@@ -3,11 +3,11 @@ name: GitHub CI Builder
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [update-to-compile-2204-2404]
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     defaults:
       run:
         shell: bash
