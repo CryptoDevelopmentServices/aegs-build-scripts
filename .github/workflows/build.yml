@@ -3,7 +3,7 @@ name: GitHub CI Builder
 on:
   workflow_dispatch:
   push:
-    branches: [update-to-compile-2204-2404]
+    branches: [main]
 
 jobs:
   build:
