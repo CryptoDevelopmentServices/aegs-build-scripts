@@ -2,12 +2,22 @@ name: GitHub CI Builder
 
 on:
   workflow_dispatch:
+    inputs:
+      os_target:
+        description: 'Choose the OS to build for'
+        required: true
+        default: 'ubuntu'
+        type: choice
+        options:
+          - ubuntu
+          - macos
+
   push:
     branches: [main]
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ${{ inputs.os_target == 'macos' && 'macos-latest' || 'ubuntu-22.04' }}
     defaults:
       run:
         shell: bash
@@ -34,14 +44,23 @@ jobs:
           git push origin $TAG_NAME
 
       - name: Make Script Executable
-        run: chmod +x ./build_adventurecoin_ubuntu.sh
+        run: |
+          chmod +x ./build_adventurecoin_ubuntu.sh
+          chmod +x ./build_adventurecoin_mac.sh
 
-      - name: Install Dependencies
+      - name: Install Dependencies (Ubuntu)
+        if: inputs.os_target == 'ubuntu'
         run: sudo apt-get update && sudo apt-get install -y imagemagick
 
-      - name: Run Build Script Non-Interactively
+      - name: Run Ubuntu Build
+        if: inputs.os_target == 'ubuntu'
         run: |
           echo -e "2\ny\ny\ny\ny\ny" | ./build_adventurecoin_ubuntu.sh
+
+      - name: Run macOS Build
+        if: inputs.os_target == 'macos'
+        run: |
+          echo -e "2\ny\ny" | ./build_adventurecoin_mac.sh
 
       - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v1
@@ -49,6 +68,8 @@ jobs:
           tag_name: ${{ env.TAG_NAME }}
           name: AdventureCoin ${{ env.TAG_NAME }}
           generate_release_notes: true
-          files: ./compiled_wallets/*
+          files: |
+            ./compiled_wallets/*
+            ./compiled_wallets_macos/*
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
