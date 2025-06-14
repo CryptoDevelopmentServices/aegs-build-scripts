@@ -49,7 +49,6 @@ cd AdventureCoin
 # --------------------------
 # Patch configure.ac properly
 # --------------------------
-# Properly patch configure.ac to insert required macros
 echo -e "${GREEN}>>> Patching configure.ac for macOS (LT_INIT, AC_PROG_CXX, etc)...${RESET}"
 CONFIG_AC="configure.ac"
 
@@ -70,7 +69,6 @@ if grep -q "AM_INIT_AUTOMAKE" "$CONFIG_AC"; then
         echo -e "${CYAN}✔ Inserted AC_PROG_CC${RESET}"
         PATCHED=1
     fi
-
     if [[ "$PATCHED" == 1 ]]; then
         echo -e "${GREEN}>>> Creating m4 directory and running aclocal...${RESET}"
         mkdir -p m4
@@ -87,29 +85,37 @@ fi
 if [[ "$(uname -m)" == "arm64" ]]; then
     echo -e "${CYAN}✔ Detected Apple Silicon (arm64), using /opt/homebrew paths${RESET}"
     export PATH="/opt/homebrew/opt/berkeley-db@4/bin:/opt/homebrew/opt/qt@5/bin:$PATH"
-    export LDFLAGS="-L/opt/homebrew/opt/berkeley-db@4/lib -L/opt/homebrew/opt/qt@5/lib"
-    export CPPFLAGS="-I/opt/homebrew/opt/berkeley-db@4/include -I/opt/homebrew/opt/qt@5/include"
+    export BOOST_ROOT="/opt/homebrew/opt/boost"
+    export BOOST_INCLUDEDIR="$BOOST_ROOT/include"
+    export BOOST_LIBRARYDIR="$BOOST_ROOT/lib"
+    export LDFLAGS="-L/opt/homebrew/opt/berkeley-db@4/lib -L/opt/homebrew/opt/qt@5/lib -L$BOOST_LIBRARYDIR"
+    export CPPFLAGS="-I/opt/homebrew/opt/berkeley-db@4/include -I/opt/homebrew/opt/qt@5/include -I$BOOST_INCLUDEDIR"
     export PKG_CONFIG_PATH="/opt/homebrew/opt/qt@5/lib/pkgconfig"
 else
     echo -e "${CYAN}✔ Detected Intel macOS, using /usr/local paths${RESET}"
     export PATH="/usr/local/opt/berkeley-db@4/bin:/usr/local/opt/qt@5/bin:$PATH"
-    export LDFLAGS="-L/usr/local/opt/berkeley-db@4/lib -L/usr/local/opt/qt@5/lib"
-    export CPPFLAGS="-I/usr/local/opt/berkeley-db@4/include -I/usr/local/opt/qt@5/include"
+    export BOOST_ROOT="/usr/local/opt/boost"
+    export BOOST_INCLUDEDIR="$BOOST_ROOT/include"
+    export BOOST_LIBRARYDIR="$BOOST_ROOT/lib"
+    export LDFLAGS="-L/usr/local/opt/berkeley-db@4/lib -L/usr/local/opt/qt@5/lib -L$BOOST_LIBRARYDIR"
+    export CPPFLAGS="-I/usr/local/opt/berkeley-db@4/include -I/usr/local/opt/qt@5/include -I$BOOST_INCLUDEDIR"
     export PKG_CONFIG_PATH="/usr/local/opt/qt@5/lib/pkgconfig"
 fi
+
+export CXXFLAGS="-std=c++11"
 
 chmod +x share/genbuild.sh
 chmod +x autogen.sh
 ./autogen.sh
 
-CONFIGURE_ARGS="--with-incompatible-bdb LDFLAGS=\"$LDFLAGS\" CPPFLAGS=\"$CPPFLAGS\""
+CONFIGURE_ARGS="--with-incompatible-bdb"
 
 if [[ "$BUILD_CHOICE" == "1" ]]; then
-    eval ./configure $CONFIGURE_ARGS --without-gui
+    ./configure $CONFIGURE_ARGS --without-gui
 elif [[ "$BUILD_CHOICE" == "2" ]]; then
-    eval ./configure $CONFIGURE_ARGS --with-gui=qt5
+    ./configure $CONFIGURE_ARGS --with-gui=qt5
 elif [[ "$BUILD_CHOICE" == "3" ]]; then
-    eval ./configure $CONFIGURE_ARGS --disable-wallet --with-gui=qt5
+    ./configure $CONFIGURE_ARGS --disable-wallet --with-gui=qt5
 fi
 
 make -j"$(sysctl -n hw.ncpu)"
