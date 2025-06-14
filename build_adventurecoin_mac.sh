@@ -104,6 +104,31 @@ fi
 
 export CXXFLAGS="-std=c++11"
 
+# --------------------------
+# Apply Boost + Qt Compatibility Patches
+# --------------------------
+echo -e "${GREEN}>>> Applying macOS compatibility patches...${RESET}"
+
+BOOST_FILES=("src/init.cpp" "src/torcontrol.cpp" "src/validation.cpp" "src/validationinterface.cpp" "src/scheduler.cpp")
+for FILE in "${BOOST_FILES[@]}"; do
+    if ! grep -q "BOOST_BIND_GLOBAL_PLACEHOLDERS" "$FILE"; then
+        sed -i.bak '1i\
+#define BOOST_BIND_GLOBAL_PLACEHOLDERS\
+' "$FILE"
+        echo -e "${CYAN}✔ Patched $FILE with BOOST_BIND_GLOBAL_PLACEHOLDERS${RESET}"
+    fi
+done
+
+# Replace deprecated is_complete() with is_absolute()
+PROTOCOL_CPP="rpc/protocol.cpp"
+if grep -q "is_complete()" "$PROTOCOL_CPP"; then
+    sed -i.bak 's/is_complete()/is_absolute()/g' "$PROTOCOL_CPP"
+    echo -e "${CYAN}✔ Replaced is_complete() with is_absolute() in $PROTOCOL_CPP${RESET}"
+fi
+
+# --------------------------
+# Build
+# --------------------------
 chmod +x share/genbuild.sh
 chmod +x autogen.sh
 ./autogen.sh
