@@ -175,9 +175,13 @@ fi
 # --------------------------
 if [[ "$TAR_PACKAGE" =~ ^[Yy]$ ]]; then
     echo -e "${GREEN}>>> Creating .tar.gz archive...${RESET}"
-    tar --warning=no-file-changed -czf "$COMPILED_DIR/adventurecoin_wallet.tar.gz" -C "$COMPILED_DIR" .
-    echo -e "${GREEN}✔ .tar.gz created at $COMPILED_DIR/adventurecoin_wallet.tar.gz${RESET}"
+    if tar --warning=no-file-changed -czf "$COMPILED_DIR/adventurecoin_wallet.tar.gz" -C "$COMPILED_DIR" .; then
+        echo -e "${GREEN}✔ .tar.gz created at $COMPILED_DIR/adventurecoin_wallet.tar.gz${RESET}"
+    else
+        echo -e "${RED}✖ Failed to create .tar.gz archive${RESET}"
+    fi
 fi
+
 
 # --------------------------
 # Qt Wallet Launcher .deb with Icons
