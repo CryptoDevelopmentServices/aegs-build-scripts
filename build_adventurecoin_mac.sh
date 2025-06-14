@@ -122,17 +122,13 @@ done
 
 # is_complete -> is_absolute fix
 PROTOCOL_CPP="rpc/protocol.cpp"
-TARGET_LINE='if (!path.is_complete()) path = GetDataDir() / path;'
-REPLACEMENT_LINE='if (!path.is_absolute()) path = GetDataDir() / path;'
-
-if grep -Fxq "$TARGET_LINE" "$PROTOCOL_CPP"; then
-    echo -e "${GREEN}>>> Patching deprecated is_complete()...${RESET}"
-    sed -i.bak "s|$TARGET_LINE|$REPLACEMENT_LINE|" "$PROTOCOL_CPP"
-    echo -e "${CYAN}✔ Replaced deprecated is_complete() with is_absolute()${RESET}"
+if grep -q 'is_complete' "$PROTOCOL_CPP"; then
+    echo -e "${GREEN}>>> Patching deprecated is_complete() in $PROTOCOL_CPP...${RESET}"
+    sed -i.bak 's/\.is_complete()/\.is_absolute()/g' "$PROTOCOL_CPP"
+    echo -e "${CYAN}✔ Patched: .is_complete() → .is_absolute()${RESET}"
 else
-    echo -e "${CYAN}✔ No matching deprecated line found in $PROTOCOL_CPP${RESET}"
+    echo -e "${CYAN}✔ No .is_complete() usage found in $PROTOCOL_CPP${RESET}"
 fi
-
 
 # --------------------------
 # Build
