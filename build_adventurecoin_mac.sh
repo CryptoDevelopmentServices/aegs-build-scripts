@@ -49,17 +49,28 @@ cd AdventureCoin
 # --------------------------
 # Patch configure.ac
 # --------------------------
-echo -e "${GREEN}>>> Patching configure.ac if needed...${RESET}"
-PATCHED_CONFIGURE_AC="configure.ac"
+echo -e "${GREEN}>>> Ensuring configure.ac has required macros...${RESET}"
+CONFIG_AC="configure.ac"
 
-if ! grep -q "LT_INIT" "$PATCHED_CONFIGURE_AC"; then
-    sed -i.bak '/AM_INIT_AUTOMAKE/a\
-AC_PROG_CC\
-AC_PROG_CXX\
-LT_INIT' "$PATCHED_CONFIGURE_AC"
-    echo -e "${CYAN}✔ Patched configure.ac with AC_PROG_CC, AC_PROG_CXX, and LT_INIT${RESET}"
+if grep -q "AM_INIT_AUTOMAKE" "$CONFIG_AC"; then
+    if ! grep -q "AC_PROG_CC" "$CONFIG_AC"; then
+        sed -i.bak '/AM_INIT_AUTOMAKE/i\
+AC_PROG_CC' "$CONFIG_AC"
+        echo -e "${CYAN}✔ Inserted AC_PROG_CC before AM_INIT_AUTOMAKE${RESET}"
+    fi
+    if ! grep -q "AC_PROG_CXX" "$CONFIG_AC"; then
+        sed -i.bak '/AM_INIT_AUTOMAKE/i\
+AC_PROG_CXX' "$CONFIG_AC"
+        echo -e "${CYAN}✔ Inserted AC_PROG_CXX before AM_INIT_AUTOMAKE${RESET}"
+    fi
+    if ! grep -q "LT_INIT" "$CONFIG_AC"; then
+        sed -i.bak '/AM_INIT_AUTOMAKE/i\
+LT_INIT' "$CONFIG_AC"
+        echo -e "${CYAN}✔ Inserted LT_INIT before AM_INIT_AUTOMAKE${RESET}"
+    fi
 else
-    echo -e "${CYAN}✔ configure.ac already patched${RESET}"
+    echo -e "${RED}✖ Could not find AM_INIT_AUTOMAKE in configure.ac — please verify the file manually.${RESET}"
+    exit 1
 fi
 
 # --------------------------
