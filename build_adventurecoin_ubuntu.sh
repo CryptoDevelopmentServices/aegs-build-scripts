@@ -76,7 +76,7 @@ cd ../../
 # --------------------------
 if [ ! -d "AdventureCoin" ]; then
     echo -e "${GREEN}>>> Cloning AdventureCoin...${RESET}"
-    git clone https://github.com/CryptoDevelopmentServices/AdventureCoin.git
+    git clone https://github.com/AdventureCoin-ADVC/AdventureCoin.git
 else
     echo -e "${GREEN}>>> Updating AdventureCoin...${RESET}"
     cd AdventureCoin && git pull && cd ..
@@ -84,9 +84,9 @@ fi
 
 cd AdventureCoin
 
-echo -e "${GREEN}>>> Checking out update-to-compile-2204-2404 branch...${RESET}"
-git fetch origin
-git checkout update-to-compile-2204-2404
+# echo -e "${GREEN}>>> Checking out update-to-compile-2204-2404 branch...${RESET}"
+# git fetch origin
+# git checkout update-to-compile-2204-2404
 
 chmod +x share/genbuild.sh
 chmod +x autogen.sh
