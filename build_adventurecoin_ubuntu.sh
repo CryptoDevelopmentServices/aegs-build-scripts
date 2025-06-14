@@ -175,7 +175,7 @@ fi
 # --------------------------
 if [[ "$TAR_PACKAGE" =~ ^[Yy]$ ]]; then
     echo -e "${GREEN}>>> Creating .tar.gz archive...${RESET}"
-    tar -czf "$COMPILED_DIR/adventurecoin_wallet.tar.gz" -C "$COMPILED_DIR" .
+    tar --warning=no-file-changed -czf "$COMPILED_DIR/adventurecoin_wallet.tar.gz" -C "$COMPILED_DIR" .
     echo -e "${GREEN}✔ .tar.gz created at $COMPILED_DIR/adventurecoin_wallet.tar.gz${RESET}"
 fi
 
