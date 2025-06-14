@@ -119,12 +119,18 @@ for FILE in "${BOOST_FILES[@]}"; do
     fi
 done
 
-# Replace deprecated is_complete() with is_absolute()
+# --------------------------
+# Replace deprecated boost::filesystem is_complete()
+# --------------------------
 PROTOCOL_CPP="rpc/protocol.cpp"
-if grep -q "is_complete()" "$PROTOCOL_CPP"; then
-    sed -i.bak 's/is_complete()/is_absolute()/g' "$PROTOCOL_CPP"
-    echo -e "${CYAN}✔ Replaced is_complete() with is_absolute() in $PROTOCOL_CPP${RESET}"
+if grep -q '\.is_complete()' "$PROTOCOL_CPP"; then
+    echo -e "${GREEN}>>> Patching is_complete() to is_absolute()...${RESET}"
+    sed -i.bak 's/\([[:alnum:]_]\+\)\.is_complete()/\1.is_absolute()/g' "$PROTOCOL_CPP"
+    echo -e "${CYAN}✔ Patched $PROTOCOL_CPP successfully${RESET}"
+else
+    echo -e "${CYAN}✔ No .is_complete() usage found in $PROTOCOL_CPP${RESET}"
 fi
+
 
 # --------------------------
 # Build
