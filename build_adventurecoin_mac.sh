@@ -33,10 +33,6 @@ read -rp $'\nDo you want to create a .app and DMG for Qt Wallet? (y/n): ' MAKE_D
 echo -e "\n${GREEN}>>> Installing build dependencies via brew...${RESET}"
 brew install automake berkeley-db@4 boost openssl libevent qt@5 protobuf qrencode miniupnpc zeromq pkg-config create-dmg
 
-export PATH="/usr/local/opt/qt@5/bin:$PATH"
-export LDFLAGS="-L/usr/local/opt/berkeley-db@4/lib -L/usr/local/opt/openssl/lib"
-export CPPFLAGS="-I/usr/local/opt/berkeley-db@4/include -I/usr/local/opt/openssl/include"
-
 # --------------------------
 # AdventureCoin source
 # --------------------------
@@ -49,6 +45,39 @@ else
 fi
 
 cd AdventureCoin
+
+# --------------------------
+# Patch configure.ac
+# --------------------------
+echo -e "${GREEN}>>> Patching configure.ac if needed...${RESET}"
+PATCHED_CONFIGURE_AC="configure.ac"
+
+if ! grep -q "LT_INIT" "$PATCHED_CONFIGURE_AC"; then
+    sed -i.bak '/AM_INIT_AUTOMAKE/a\
+AC_PROG_CC\
+AC_PROG_CXX\
+LT_INIT' "$PATCHED_CONFIGURE_AC"
+    echo -e "${CYAN}✔ Patched configure.ac with AC_PROG_CC, AC_PROG_CXX, and LT_INIT${RESET}"
+else
+    echo -e "${CYAN}✔ configure.ac already patched${RESET}"
+fi
+
+# --------------------------
+# Set environment paths based on architecture
+# --------------------------
+if [[ "$(uname -m)" == "arm64" ]]; then
+    echo -e "${CYAN}✔ Detected Apple Silicon (arm64), using /opt/homebrew paths${RESET}"
+    export PATH="/opt/homebrew/opt/berkeley-db@4/bin:/opt/homebrew/opt/qt@5/bin:$PATH"
+    export LDFLAGS="-L/opt/homebrew/opt/berkeley-db@4/lib -L/opt/homebrew/opt/qt@5/lib"
+    export CPPFLAGS="-I/opt/homebrew/opt/berkeley-db@4/include -I/opt/homebrew/opt/qt@5/include"
+    export PKG_CONFIG_PATH="/opt/homebrew/opt/qt@5/lib/pkgconfig"
+else
+    echo -e "${CYAN}✔ Detected Intel macOS, using /usr/local paths${RESET}"
+    export PATH="/usr/local/opt/berkeley-db@4/bin:/usr/local/opt/qt@5/bin:$PATH"
+    export LDFLAGS="-L/usr/local/opt/berkeley-db@4/lib -L/usr/local/opt/qt@5/lib"
+    export CPPFLAGS="-I/usr/local/opt/berkeley-db@4/include -I/usr/local/opt/qt@5/include"
+    export PKG_CONFIG_PATH="/usr/local/opt/qt@5/lib/pkgconfig"
+fi
 
 chmod +x share/genbuild.sh
 chmod +x autogen.sh
