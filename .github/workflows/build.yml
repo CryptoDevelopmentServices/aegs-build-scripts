@@ -16,6 +16,23 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
+      - name: Set Build Tag
+        id: set_tag
+        run: |
+          export TAG="v$(date +'%Y%m%d-%H%M')"
+          echo "TAG_NAME=$TAG" >> $GITHUB_ENV
+          echo "tag_name=$TAG" >> $GITHUB_OUTPUT
+
+      - name: Set Git Identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Create Git Tag
+        run: |
+          git tag $TAG_NAME
+          git push origin $TAG_NAME
+
       - name: Make Script Executable
         run: chmod +x ./build_adventurecoin_ubuntu.sh
 
@@ -26,8 +43,12 @@ jobs:
         run: |
           echo -e "2\ny\ny\ny\ny\ny" | ./build_adventurecoin_ubuntu.sh
 
-      - name: Upload Binaries
-        uses: actions/upload-artifact@v4
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v1
         with:
-          name: compiled-wallets
-          path: compiled_wallets/*
+          tag_name: ${{ env.TAG_NAME }}
+          name: AdventureCoin ${{ env.TAG_NAME }}
+          generate_release_notes: true
+          files: ./compiled_wallets/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
