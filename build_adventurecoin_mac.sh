@@ -108,7 +108,7 @@ chmod +x share/genbuild.sh
 chmod +x autogen.sh
 ./autogen.sh
 
-CONFIGURE_ARGS="--with-incompatible-bdb"
+CONFIGURE_ARGS="--with-incompatible-bdb --with-boost-libdir=$BOOST_LIBRARYDIR"
 
 if [[ "$BUILD_CHOICE" == "1" ]]; then
     ./configure $CONFIGURE_ARGS --without-gui
