@@ -80,10 +80,10 @@ else
 fi
 
 # --------------------------
-# Set environment paths based on architecture
+# Set environment paths
 # --------------------------
 if [[ "$(uname -m)" == "arm64" ]]; then
-    echo -e "${CYAN}✔ Detected Apple Silicon (arm64), using /opt/homebrew paths${RESET}"
+    echo -e "${CYAN}✔ Detected Apple Silicon (arm64)${RESET}"
     export PATH="/opt/homebrew/opt/berkeley-db@4/bin:/opt/homebrew/opt/qt@5/bin:$PATH"
     export BOOST_ROOT="/opt/homebrew/opt/boost"
     export BOOST_INCLUDEDIR="$BOOST_ROOT/include"
@@ -92,7 +92,7 @@ if [[ "$(uname -m)" == "arm64" ]]; then
     export CPPFLAGS="-I/opt/homebrew/opt/berkeley-db@4/include -I/opt/homebrew/opt/qt@5/include -I$BOOST_INCLUDEDIR"
     export PKG_CONFIG_PATH="/opt/homebrew/opt/qt@5/lib/pkgconfig"
 else
-    echo -e "${CYAN}✔ Detected Intel macOS, using /usr/local paths${RESET}"
+    echo -e "${CYAN}✔ Detected Intel macOS${RESET}"
     export PATH="/usr/local/opt/berkeley-db@4/bin:/usr/local/opt/qt@5/bin:$PATH"
     export BOOST_ROOT="/usr/local/opt/boost"
     export BOOST_INCLUDEDIR="$BOOST_ROOT/include"
@@ -105,10 +105,11 @@ fi
 export CXXFLAGS="-std=c++11"
 
 # --------------------------
-# Apply Boost + Qt Compatibility Patches
+# Apply macOS Compatibility Patches
 # --------------------------
 echo -e "${GREEN}>>> Applying macOS compatibility patches...${RESET}"
 
+# Boost global placeholder patch
 BOOST_FILES=("src/init.cpp" "src/torcontrol.cpp" "src/validation.cpp" "src/validationinterface.cpp" "src/scheduler.cpp")
 for FILE in "${BOOST_FILES[@]}"; do
     if ! grep -q "BOOST_BIND_GLOBAL_PLACEHOLDERS" "$FILE"; then
@@ -119,24 +120,18 @@ for FILE in "${BOOST_FILES[@]}"; do
     fi
 done
 
-# --------------------------
-# Replace deprecated boost::filesystem is_complete()
-# --------------------------
+# is_complete -> is_absolute fix
 PROTOCOL_CPP="rpc/protocol.cpp"
 if grep -q '\.is_complete()' "$PROTOCOL_CPP"; then
-    echo -e "${GREEN}>>> Patching is_complete() to is_absolute()...${RESET}"
+    echo -e "${GREEN}>>> Fixing deprecated is_complete()...${RESET}"
     sed -i.bak 's/\([[:alnum:]_]\+\)\.is_complete()/\1.is_absolute()/g' "$PROTOCOL_CPP"
-    echo -e "${CYAN}✔ Patched $PROTOCOL_CPP successfully${RESET}"
-else
-    echo -e "${CYAN}✔ No .is_complete() usage found in $PROTOCOL_CPP${RESET}"
+    echo -e "${CYAN}✔ Patched $PROTOCOL_CPP${RESET}"
 fi
-
 
 # --------------------------
 # Build
 # --------------------------
-chmod +x share/genbuild.sh
-chmod +x autogen.sh
+chmod +x share/genbuild.sh autogen.sh
 ./autogen.sh
 
 CONFIGURE_ARGS="--with-incompatible-bdb --with-boost-libdir=$BOOST_LIBRARYDIR"
@@ -152,10 +147,7 @@ fi
 make -j"$(sysctl -n hw.ncpu)"
 
 mkdir -p "$COMPILED_DIR"
-
-[[ "$BUILD_CHOICE" =~ [12] ]] && cp src/adventurecoind "$COMPILED_DIR/" 2>/dev/null || true
-[[ "$BUILD_CHOICE" =~ [12] ]] && cp src/adventurecoin-cli "$COMPILED_DIR/" 2>/dev/null || true
-[[ "$BUILD_CHOICE" =~ [12] ]] && cp src/adventurecoin-tx "$COMPILED_DIR/" 2>/dev/null || true
+[[ "$BUILD_CHOICE" =~ [12] ]] && cp src/adventurecoind src/adventurecoin-cli src/adventurecoin-tx "$COMPILED_DIR/" 2>/dev/null || true
 [[ "$BUILD_CHOICE" =~ [23] ]] && cp src/qt/adventurecoin-qt "$COMPILED_DIR/" 2>/dev/null || true
 
 # --------------------------
@@ -171,15 +163,14 @@ fi
 # --------------------------
 if [[ "$MAKE_DMG" =~ ^[Yy]$ && -f "$COMPILED_DIR/adventurecoin-qt" ]]; then
     echo -e "${GREEN}>>> Creating .app bundle...${RESET}"
-
     APP_BUNDLE_DIR="${COMPILED_DIR}/AdventureCoin-Qt.app"
-    mkdir -p "$APP_BUNDLE_DIR/Contents/MacOS"
-    mkdir -p "$APP_BUNDLE_DIR/Contents/Resources"
+    mkdir -p "$APP_BUNDLE_DIR/Contents/MacOS" "$APP_BUNDLE_DIR/Contents/Resources"
 
     cp "$COMPILED_DIR/adventurecoin-qt" "$APP_BUNDLE_DIR/Contents/MacOS/"
-    echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
-<plist version=\"1.0\">
+    cat > "$APP_BUNDLE_DIR/Contents/Info.plist" <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
 <dict>
   <key>CFBundleExecutable</key>
   <string>adventurecoin-qt</string>
@@ -192,7 +183,8 @@ if [[ "$MAKE_DMG" =~ ^[Yy]$ && -f "$COMPILED_DIR/adventurecoin-qt" ]]; then
   <key>CFBundlePackageType</key>
   <string>APPL</string>
 </dict>
-</plist>" > "$APP_BUNDLE_DIR/Contents/Info.plist"
+</plist>
+EOF
 
     echo -e "${GREEN}>>> Running macdeployqt...${RESET}"
     macdeployqt "$APP_BUNDLE_DIR" || echo -e "${RED}✖ macdeployqt failed (ensure Qt is in PATH)${RESET}"
