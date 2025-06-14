@@ -189,7 +189,7 @@ fi
 if [[ "$QT_LAUNCHER_DEB" =~ ^[Yy]$ && -f "$COMPILED_DIR/adventurecoin-qt" ]]; then
     echo -e "${GREEN}>>> Creating full Qt Wallet launcher .deb with icons...${RESET}"
 
-    wget -O advc_icon.png https://i.imgur.com/uktT3CY.png
+    wget -O advc_icon.png https://raw.githubusercontent.com/CryptoDevelopmentServices/advc-build-scripts/main/uktT3CY.png
 
     mkdir -p qt-launcher-deb/DEBIAN
     mkdir -p qt-launcher-deb/usr/local/bin
