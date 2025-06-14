@@ -31,7 +31,7 @@ read -rp $'\nDo you want to create a .app and DMG for Qt Wallet? (y/n): ' MAKE_D
 # Dependencies
 # --------------------------
 echo -e "\n${GREEN}>>> Installing build dependencies via brew...${RESET}"
-brew install automake berkeley-db@4 boost openssl libevent qt@5 protobuf qrencode miniupnpc zeromq pkg-config create-dmg
+brew install automake libtool berkeley-db@4 boost openssl libevent qt@5 protobuf qrencode miniupnpc zeromq pkg-config create-dmg
 
 # --------------------------
 # AdventureCoin source
@@ -47,31 +47,42 @@ fi
 cd AdventureCoin
 
 # --------------------------
-# Patch configure.ac
+# Patch configure.ac properly
 # --------------------------
-echo -e "${GREEN}>>> Ensuring configure.ac has required macros...${RESET}"
+echo -e "${GREEN}>>> Patching configure.ac for macOS (LT_INIT, AC_PROG_CXX, etc)...${RESET}"
 CONFIG_AC="configure.ac"
 
 if grep -q "AM_INIT_AUTOMAKE" "$CONFIG_AC"; then
-    if ! grep -q "AC_PROG_CC" "$CONFIG_AC"; then
+    PATCHED=0
+    # Always insert LT_INIT above AM_INIT_AUTOMAKE
+    if ! grep -q "LT_INIT" "$CONFIG_AC"; then
         sed -i.bak '/AM_INIT_AUTOMAKE/i\
-AC_PROG_CC' "$CONFIG_AC"
-        echo -e "${CYAN}✔ Inserted AC_PROG_CC before AM_INIT_AUTOMAKE${RESET}"
+LT_INIT' "$CONFIG_AC"
+        echo -e "${CYAN}✔ Inserted LT_INIT${RESET}"
+        PATCHED=1
     fi
     if ! grep -q "AC_PROG_CXX" "$CONFIG_AC"; then
         sed -i.bak '/AM_INIT_AUTOMAKE/i\
 AC_PROG_CXX' "$CONFIG_AC"
-        echo -e "${CYAN}✔ Inserted AC_PROG_CXX before AM_INIT_AUTOMAKE${RESET}"
+        echo -e "${CYAN}✔ Inserted AC_PROG_CXX${RESET}"
+        PATCHED=1
     fi
-    if ! grep -q "LT_INIT" "$CONFIG_AC"; then
+    if ! grep -q "AC_PROG_CC" "$CONFIG_AC"; then
         sed -i.bak '/AM_INIT_AUTOMAKE/i\
-LT_INIT' "$CONFIG_AC"
-        echo -e "${CYAN}✔ Inserted LT_INIT before AM_INIT_AUTOMAKE${RESET}"
+AC_PROG_CC' "$CONFIG_AC"
+        echo -e "${CYAN}✔ Inserted AC_PROG_CC${RESET}"
+        PATCHED=1
+    fi
+
+    if [[ "$PATCHED" == 1 ]]; then
+        echo -e "${GREEN}>>> Running aclocal after patch...${RESET}"
+        aclocal -I m4 || true
     fi
 else
-    echo -e "${RED}✖ Could not find AM_INIT_AUTOMAKE in configure.ac — please verify the file manually.${RESET}"
+    echo -e "${RED}✖ Could not find AM_INIT_AUTOMAKE in configure.ac — please verify manually.${RESET}"
     exit 1
 fi
+
 
 # --------------------------
 # Set environment paths based on architecture
