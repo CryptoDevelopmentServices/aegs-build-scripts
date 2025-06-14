@@ -49,40 +49,37 @@ cd AdventureCoin
 # --------------------------
 # Patch configure.ac properly
 # --------------------------
+# Properly patch configure.ac to insert required macros
 echo -e "${GREEN}>>> Patching configure.ac for macOS (LT_INIT, AC_PROG_CXX, etc)...${RESET}"
 CONFIG_AC="configure.ac"
 
 if grep -q "AM_INIT_AUTOMAKE" "$CONFIG_AC"; then
     PATCHED=0
-    # Always insert LT_INIT above AM_INIT_AUTOMAKE
     if ! grep -q "LT_INIT" "$CONFIG_AC"; then
-        sed -i.bak '/AM_INIT_AUTOMAKE/i\
-LT_INIT' "$CONFIG_AC"
+        awk '{print} /AM_INIT_AUTOMAKE/ && !x {print "LT_INIT"; x=1}' "$CONFIG_AC" > "$CONFIG_AC.tmp" && mv "$CONFIG_AC.tmp" "$CONFIG_AC"
         echo -e "${CYAN}✔ Inserted LT_INIT${RESET}"
         PATCHED=1
     fi
     if ! grep -q "AC_PROG_CXX" "$CONFIG_AC"; then
-        sed -i.bak '/AM_INIT_AUTOMAKE/i\
-AC_PROG_CXX' "$CONFIG_AC"
+        awk '{print} /AM_INIT_AUTOMAKE/ && !x {print "AC_PROG_CXX"; x=1}' "$CONFIG_AC" > "$CONFIG_AC.tmp" && mv "$CONFIG_AC.tmp" "$CONFIG_AC"
         echo -e "${CYAN}✔ Inserted AC_PROG_CXX${RESET}"
         PATCHED=1
     fi
     if ! grep -q "AC_PROG_CC" "$CONFIG_AC"; then
-        sed -i.bak '/AM_INIT_AUTOMAKE/i\
-AC_PROG_CC' "$CONFIG_AC"
+        awk '{print} /AM_INIT_AUTOMAKE/ && !x {print "AC_PROG_CC"; x=1}' "$CONFIG_AC" > "$CONFIG_AC.tmp" && mv "$CONFIG_AC.tmp" "$CONFIG_AC"
         echo -e "${CYAN}✔ Inserted AC_PROG_CC${RESET}"
         PATCHED=1
     fi
 
     if [[ "$PATCHED" == 1 ]]; then
-        echo -e "${GREEN}>>> Running aclocal after patch...${RESET}"
+        echo -e "${GREEN}>>> Creating m4 directory and running aclocal...${RESET}"
+        mkdir -p m4
         aclocal -I m4 || true
     fi
 else
     echo -e "${RED}✖ Could not find AM_INIT_AUTOMAKE in configure.ac — please verify manually.${RESET}"
     exit 1
 fi
-
 
 # --------------------------
 # Set environment paths based on architecture
