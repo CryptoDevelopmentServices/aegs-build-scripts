@@ -14,17 +14,23 @@ echo -e "${CYAN}============================="
 echo -e " AdventureCoin macOS Builder"
 echo -e "=============================${RESET}"
 
+# --------------------------
 # 1. Build type
+# --------------------------
 echo -e "\n${GREEN}Select build type:${RESET}"
 echo "1) Daemon only"
 echo "2) Daemon + Qt Wallet (full)"
 echo "3) Qt Wallet only"
 read -rp "Enter choice [1-3]: " BUILD_CHOICE
 
+# --------------------------
 # 2. Strip?
+# --------------------------
 read -rp $'\nDo you want to strip the binaries after build? (y/n): ' STRIP_BIN
 
+# --------------------------
 # 3. Create .app + .dmg?
+# --------------------------
 read -rp $'\nDo you want to create a .app and DMG for Qt Wallet? (y/n): ' MAKE_DMG
 
 # --------------------------
@@ -62,7 +68,30 @@ else
     echo -e "${CYAN}✔ Protobuf 3.6.1 already installed at $PROTOBUF_DIR${RESET}"
 fi
 
+# --------------------------
+# Fix missing protobuf.pc if needed
+# --------------------------
+if [ ! -f "$PROTOBUF_DIR/lib/pkgconfig/protobuf.pc" ]; then
+    echo -e "${GREEN}>>> Creating missing protobuf.pc...${RESET}"
+    mkdir -p "$PROTOBUF_DIR/lib/pkgconfig"
+    cat > "$PROTOBUF_DIR/lib/pkgconfig/protobuf.pc" <<EOF
+prefix=$PROTOBUF_DIR
+exec_prefix=\${prefix}
+libdir=\${exec_prefix}/lib
+includedir=\${prefix}/include
+
+Name: Protocol Buffers
+Description: Google's Data Interchange Format
+Version: 3.6.1
+Libs: -L\${libdir} -lprotobuf
+Cflags: -I\${includedir}
+EOF
+    echo -e "${CYAN}✔ Created protobuf.pc at $PROTOBUF_DIR/lib/pkgconfig${RESET}"
+fi
+
+# --------------------------
 # Set protobuf paths
+# --------------------------
 export PATH="$PROTOBUF_DIR/bin:$PATH"
 export LD_LIBRARY_PATH="$PROTOBUF_DIR/lib:$LD_LIBRARY_PATH"
 export PKG_CONFIG_PATH="$PROTOBUF_DIR/lib/pkgconfig:$PKG_CONFIG_PATH"
