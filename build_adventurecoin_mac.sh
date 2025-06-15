@@ -2,6 +2,15 @@
 
 set -e
 
+# --------------------------------
+# Ensure $HOME is defined properly
+# --------------------------------
+if [[ ! "$HOME" =~ ^/ ]]; then
+  echo -e "${RED}⚠ Detected invalid \$HOME: '$HOME'. Fixing...${RESET}"
+  export HOME="$(eval echo ~$USER)"
+  echo -e "${GREEN}✔ HOME corrected to: $HOME${RESET}"
+fi
+
 # Fix PATH so basic commands are found
 export PATH="/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:$PATH"
 

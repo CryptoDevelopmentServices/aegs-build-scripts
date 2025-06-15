@@ -29,7 +29,7 @@ jobs:
       - name: Set Build Tag
         id: set_tag
         run: |
-          export TAG="v$(date +'%Y%m%d-%H%M')"
+          TAG="v$(date +'%Y%m%d-%H%M')"
           echo "TAG_NAME=$TAG" >> $GITHUB_ENV
           echo "tag_name=$TAG" >> $GITHUB_OUTPUT
 
@@ -40,38 +40,43 @@ jobs:
 
       - name: Create Git Tag
         run: |
-          git tag $TAG_NAME
-          git push origin $TAG_NAME
+          git tag "$TAG_NAME"
+          git push origin "$TAG_NAME"
 
-      - name: Make Script Executable
+      - name: Make Scripts Executable
         run: |
           chmod +x ./build_adventurecoin_ubuntu.sh
           chmod +x ./build_adventurecoin_mac.sh
 
+      # Ubuntu specific steps
       - name: Install Dependencies (Ubuntu)
-        if: inputs.os_target == 'ubuntu'
-        run: sudo apt-get update && sudo apt-get install -y imagemagick
+        if: ${{ inputs.os_target == 'ubuntu' }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y imagemagick
 
-      - name: Run Ubuntu Build
-        if: inputs.os_target == 'ubuntu'
+      - name: Run Ubuntu Build Script
+        if: ${{ inputs.os_target == 'ubuntu' }}
         run: |
           echo -e "2\ny\ny\ny\ny\ny" | ./build_adventurecoin_ubuntu.sh
 
-      - name: Remove conflicting Protobuf versions (macOS)
-        if: inputs.os_target == 'macos'
+      # macOS specific steps
+      - name: Uninstall Protobuf (macOS clean slate)
+        if: ${{ inputs.os_target == 'macos' }}
         run: |
           brew uninstall --ignore-dependencies protobuf || true
-          brew cleanup
+          brew cleanup || true
 
-      - name: Run macOS Build
-        if: inputs.os_target == 'macos'
+      - name: Run macOS Build Script
+        if: ${{ inputs.os_target == 'macos' }}
         env:
-          PATH: "$HOME/local/protobuf-3.6.1/bin:/usr/local/bin:/opt/homebrew/bin:${{ env.PATH }}"
-          PKG_CONFIG_PATH: "$HOME/local/protobuf-3.6.1/lib/pkgconfig"
-          LD_LIBRARY_PATH: "$HOME/local/protobuf-3.6.1/lib"
-          LDFLAGS: "-L$HOME/local/protobuf-3.6.1/lib"
-          CPPFLAGS: "-I$HOME/local/protobuf-3.6.1/include"
-          PROTOC: "$HOME/local/protobuf-3.6.1/bin/protoc"
+          HOME: ${{ github.workspace }}
+          PATH: "${{ github.workspace }}/local/protobuf-3.6.1/bin:/usr/local/bin:/opt/homebrew/bin:${{ env.PATH }}"
+          PKG_CONFIG_PATH: "${{ github.workspace }}/local/protobuf-3.6.1/lib/pkgconfig"
+          LD_LIBRARY_PATH: "${{ github.workspace }}/local/protobuf-3.6.1/lib"
+          LDFLAGS: "-L${{ github.workspace }}/local/protobuf-3.6.1/lib"
+          CPPFLAGS: "-I${{ github.workspace }}/local/protobuf-3.6.1/include"
+          PROTOC: "${{ github.workspace }}/local/protobuf-3.6.1/bin/protoc"
         run: |
           echo -e "2\ny\ny" | ./build_adventurecoin_mac.sh
 
