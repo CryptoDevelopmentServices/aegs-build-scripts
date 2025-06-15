@@ -28,6 +28,11 @@ read -rp $'\nDo you want to strip the binaries after build? (y/n): ' STRIP_BIN
 read -rp $'\nDo you want to create a .app and DMG for Qt Wallet? (y/n): ' MAKE_DMG
 
 # --------------------------
+# Environment PATH fallback
+# --------------------------
+export PATH="/usr/local/bin:/opt/homebrew/bin:$PATH"
+
+# --------------------------
 # Dependencies
 # --------------------------
 echo -e "\n${GREEN}>>> Installing build dependencies via brew...${RESET}"
@@ -43,6 +48,7 @@ PROTOBUF_URL="https://github.com/protocolbuffers/protobuf/releases/download/v3.6
 if [ ! -f "$PROTOBUF_DIR/bin/protoc" ]; then
     echo -e "${GREEN}>>> Installing Protobuf 3.6.1 (compatible version)...${RESET}"
     mkdir -p "$HOME/local"
+    CUR_DIR="$(pwd)"
     cd /tmp
     curl -LO "$PROTOBUF_URL"
     tar -xvf "$PROTOBUF_TAR"
@@ -51,6 +57,7 @@ if [ ! -f "$PROTOBUF_DIR/bin/protoc" ]; then
     make -j"$(sysctl -n hw.logicalcpu)"
     make install
     echo -e "${CYAN}✔ Installed Protobuf 3.6.1 to $PROTOBUF_DIR${RESET}"
+    cd "$CUR_DIR"
 else
     echo -e "${CYAN}✔ Protobuf 3.6.1 already installed at $PROTOBUF_DIR${RESET}"
 fi
@@ -60,8 +67,8 @@ export PATH="$PROTOBUF_DIR/bin:$PATH"
 export LD_LIBRARY_PATH="$PROTOBUF_DIR/lib:$LD_LIBRARY_PATH"
 export PKG_CONFIG_PATH="$PROTOBUF_DIR/lib/pkgconfig:$PKG_CONFIG_PATH"
 export PROTOC="$PROTOBUF_DIR/bin/protoc"
-
-cd "$OLDPWD"
+export LDFLAGS="-L$PROTOBUF_DIR/lib $LDFLAGS"
+export CPPFLAGS="-I$PROTOBUF_DIR/include $CPPFLAGS"
 
 # --------------------------
 # AdventureCoin source
@@ -139,7 +146,6 @@ export CXXFLAGS="-std=c++11"
 # --------------------------
 echo -e "${GREEN}>>> Applying macOS compatibility patches...${RESET}"
 
-# Boost global placeholder patch
 BOOST_FILES=("src/init.cpp" "src/torcontrol.cpp" "src/validation.cpp" "src/validationinterface.cpp" "src/scheduler.cpp")
 for FILE in "${BOOST_FILES[@]}"; do
     if ! grep -q "BOOST_BIND_GLOBAL_PLACEHOLDERS" "$FILE"; then
@@ -150,7 +156,6 @@ for FILE in "${BOOST_FILES[@]}"; do
     fi
 done
 
-# is_complete -> is_absolute fix
 PROTOCOL_CPP="rpc/protocol.cpp"
 if grep -q 'is_complete' "$PROTOCOL_CPP"; then
     echo -e "${GREEN}>>> Patching deprecated is_complete() in $PROTOCOL_CPP...${RESET}"
@@ -176,7 +181,7 @@ elif [[ "$BUILD_CHOICE" == "3" ]]; then
     ./configure $CONFIGURE_ARGS --disable-wallet --with-gui=qt5
 fi
 
-make -j"$(sysctl -n hw.ncpu)"
+make -j"$(sysctl -n hw.logicalcpu)"
 
 mkdir -p "$COMPILED_DIR"
 [[ "$BUILD_CHOICE" =~ [12] ]] && cp src/adventurecoind src/adventurecoin-cli src/adventurecoin-tx "$COMPILED_DIR/" 2>/dev/null || true
@@ -219,7 +224,7 @@ if [[ "$MAKE_DMG" =~ ^[Yy]$ && -f "$COMPILED_DIR/adventurecoin-qt" ]]; then
 EOF
 
     echo -e "${GREEN}>>> Running macdeployqt...${RESET}"
-    macdeployqt "$APP_BUNDLE_DIR" || echo -e "${RED}✖ macdeployqt failed (ensure Qt is in PATH)${RESET}"
+    macdeployqt "$APP_BUNDLE_DIR" || { echo -e "${RED}✖ macdeployqt failed. Ensure Qt is in PATH and compatible.${RESET}"; exit 1; }
 
     echo -e "${GREEN}>>> Creating DMG...${RESET}"
     DMG_PATH="${COMPILED_DIR}/AdventureCoin-Wallet.dmg"
