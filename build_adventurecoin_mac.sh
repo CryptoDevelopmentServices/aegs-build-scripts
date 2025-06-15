@@ -117,7 +117,7 @@ fi
 # --------------------------
 if [ ! -d "AdventureCoin" ]; then
     echo -e "${GREEN}>>> Cloning AdventureCoin...${RESET}"
-    git clone https://github.com/CryptoDevelopmentServices/AdventureCoin.git
+    git clone https://github.com/AdventureCoin-ADVC/AdventureCoin.git
 else
     echo -e "${GREEN}>>> Updating AdventureCoin...${RESET}"
     cd AdventureCoin && git pull && cd ..
