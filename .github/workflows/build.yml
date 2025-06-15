@@ -57,33 +57,18 @@ jobs:
         run: |
           echo -e "2\ny\ny\ny\ny\ny" | ./build_adventurecoin_ubuntu.sh
 
+      - name: Install Protobuf (macOS)
+        if: inputs.os_target == 'macos'
+        run: |
+          brew install protobuf@3
+          echo 'PATH="/opt/homebrew/opt/protobuf@3/bin:$PATH"' >> $GITHUB_ENV
+          echo 'LDFLAGS="-L/opt/homebrew/opt/protobuf@3/lib $LDFLAGS"' >> $GITHUB_ENV
+          echo 'CPPFLAGS="-I/opt/homebrew/opt/protobuf@3/include $CPPFLAGS"' >> $GITHUB_ENV
+          echo 'PKG_CONFIG_PATH="/opt/homebrew/opt/protobuf@3/lib/pkgconfig:$PKG_CONFIG_PATH"' >> $GITHUB_ENV
+
       - name: Run macOS Build
         if: inputs.os_target == 'macos'
         run: |
-          # Set up and build Protobuf 3.6.1
-          export PROTOBUF_DIR="$HOME/local/protobuf-3.6.1"
-          mkdir -p "$PROTOBUF_DIR"
-          curl -LO https://github.com/protocolbuffers/protobuf/releases/download/v3.6.1/protobuf-cpp-3.6.1.tar.gz
-          tar -xzf protobuf-cpp-3.6.1.tar.gz
-          cd protobuf-3.6.1
-          ./configure --prefix="$PROTOBUF_DIR"
-          make -j$(sysctl -n hw.logicalcpu)
-          make install
-          cd ..
-
-          # Export environment variables
-          export PKG_CONFIG_PATH="$PROTOBUF_DIR/lib/pkgconfig:$PKG_CONFIG_PATH"
-          export LDFLAGS="-L$PROTOBUF_DIR/lib $LDFLAGS"
-          export CPPFLAGS="-I$PROTOBUF_DIR/include $CPPFLAGS"
-          export LD_LIBRARY_PATH="$PROTOBUF_DIR/lib:$LD_LIBRARY_PATH"
-          export PATH="$PROTOBUF_DIR/bin:$PATH"
-          export PROTOC="$PROTOBUF_DIR/bin/protoc"
-
-          # Confirm protobuf installed
-          $PROTOC --version
-          pkg-config --modversion protobuf || echo "pkg-config failed"
-
-          # Run the macOS build script
           echo -e "2\ny\ny" | ./build_adventurecoin_mac.sh
 
       - name: Upload to GitHub Release
