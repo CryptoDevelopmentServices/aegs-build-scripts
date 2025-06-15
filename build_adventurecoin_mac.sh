@@ -84,6 +84,16 @@ fi
 cd AdventureCoin
 
 # --------------------------
+# Confirm Protobuf environment
+# --------------------------
+echo -e "${CYAN}>>> Checking protoc version...${RESET}"
+which protoc
+protoc --version || { echo -e "${RED}✖ protoc not found or not working.${RESET}"; exit 1; }
+
+echo -e "${CYAN}>>> Checking pkg-config path for protobuf...${RESET}"
+pkg-config --modversion protobuf || echo -e "${RED}⚠ protobuf not found via pkg-config${RESET}"
+
+# --------------------------
 # Patch configure.ac properly
 # --------------------------
 echo -e "${GREEN}>>> Patching configure.ac for macOS (LT_INIT, AC_PROG_CXX, etc)...${RESET}"
@@ -166,13 +176,15 @@ else
 fi
 
 # --------------------------
-# Build
+# Configure and Build
 # --------------------------
+CONFIGURE_ARGS="--with-incompatible-bdb --with-boost-libdir=$BOOST_LIBRARYDIR --with-protobuf=$PROTOBUF_DIR"
+
+echo -e "${GREEN}>>> Running autogen.sh...${RESET}"
 chmod +x share/genbuild.sh autogen.sh
 ./autogen.sh
 
-CONFIGURE_ARGS="--with-incompatible-bdb --with-boost-libdir=$BOOST_LIBRARYDIR"
-
+echo -e "${GREEN}>>> Running configure with args: $CONFIGURE_ARGS${RESET}"
 if [[ "$BUILD_CHOICE" == "1" ]]; then
     ./configure $CONFIGURE_ARGS --without-gui
 elif [[ "$BUILD_CHOICE" == "2" ]]; then
@@ -181,6 +193,7 @@ elif [[ "$BUILD_CHOICE" == "3" ]]; then
     ./configure $CONFIGURE_ARGS --disable-wallet --with-gui=qt5
 fi
 
+echo -e "${GREEN}>>> Starting make...${RESET}"
 make -j"$(sysctl -n hw.logicalcpu)"
 
 mkdir -p "$COMPILED_DIR"
