@@ -2,6 +2,9 @@
 
 set -e
 
+# Fix PATH so basic commands are found
+export PATH="/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:$PATH"
+
 GREEN="\033[0;32m"
 RED="\033[0;31m"
 CYAN="\033[0;36m"
