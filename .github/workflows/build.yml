@@ -65,8 +65,14 @@ jobs:
 
       - name: Run macOS Build
         if: inputs.os_target == 'macos'
+        env:
+          PATH: "$HOME/local/protobuf-3.6.1/bin:/usr/local/bin:/opt/homebrew/bin:${{ env.PATH }}"
+          PKG_CONFIG_PATH: "$HOME/local/protobuf-3.6.1/lib/pkgconfig"
+          LD_LIBRARY_PATH: "$HOME/local/protobuf-3.6.1/lib"
+          LDFLAGS: "-L$HOME/local/protobuf-3.6.1/lib"
+          CPPFLAGS: "-I$HOME/local/protobuf-3.6.1/include"
+          PROTOC: "$HOME/local/protobuf-3.6.1/bin/protoc"
         run: |
-          export PATH="$HOME/local/protobuf-3.6.1/bin:$PATH"
           echo -e "2\ny\ny" | ./build_adventurecoin_mac.sh
 
       - name: Upload to GitHub Release

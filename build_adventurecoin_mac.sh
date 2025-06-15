@@ -101,16 +101,6 @@ if [ -n "$GITHUB_ENV" ]; then
 fi
 
 # --------------------------
-# Set protobuf paths
-# --------------------------
-export PATH="$PROTOBUF_DIR/bin:$PATH"
-export LD_LIBRARY_PATH="$PROTOBUF_DIR/lib:$LD_LIBRARY_PATH"
-export PKG_CONFIG_PATH="$PROTOBUF_DIR/lib/pkgconfig:$PKG_CONFIG_PATH"
-export PROTOC="$PROTOBUF_DIR/bin/protoc"
-export LDFLAGS="-L$PROTOBUF_DIR/lib $LDFLAGS"
-export CPPFLAGS="-I$PROTOBUF_DIR/include $CPPFLAGS"
-
-# --------------------------
 # AdventureCoin source
 # --------------------------
 if [ ! -d "AdventureCoin" ]; then
@@ -175,19 +165,27 @@ if [[ "$(uname -m)" == "arm64" ]]; then
     export BOOST_ROOT="/opt/homebrew/opt/boost"
     export BOOST_INCLUDEDIR="$BOOST_ROOT/include"
     export BOOST_LIBRARYDIR="$BOOST_ROOT/lib"
-    export LDFLAGS="-L/opt/homebrew/opt/berkeley-db@4/lib -L/opt/homebrew/opt/qt@5/lib -L$BOOST_LIBRARYDIR"
-    export CPPFLAGS="-I/opt/homebrew/opt/berkeley-db@4/include -I/opt/homebrew/opt/qt@5/include -I$BOOST_INCLUDEDIR"
-    export PKG_CONFIG_PATH="/opt/homebrew/opt/qt@5/lib/pkgconfig"
+    export LDFLAGS="-L/opt/homebrew/opt/berkeley-db@4/lib -L/opt/homebrew/opt/qt@5/lib -L$BOOST_LIBRARYDIR $LDFLAGS"
+    export CPPFLAGS="-I/opt/homebrew/opt/berkeley-db@4/include -I/opt/homebrew/opt/qt@5/include -I$BOOST_INCLUDEDIR $CPPFLAGS"
+    export PKG_CONFIG_PATH="/opt/homebrew/opt/qt@5/lib/pkgconfig:$PKG_CONFIG_PATH"
 else
     echo -e "${CYAN}✔ Detected Intel macOS${RESET}"
     export PATH="/usr/local/opt/berkeley-db@4/bin:/usr/local/opt/qt@5/bin:$PATH"
     export BOOST_ROOT="/usr/local/opt/boost"
     export BOOST_INCLUDEDIR="$BOOST_ROOT/include"
     export BOOST_LIBRARYDIR="$BOOST_ROOT/lib"
-    export LDFLAGS="-L/usr/local/opt/berkeley-db@4/lib -L/usr/local/opt/qt@5/lib -L$BOOST_LIBRARYDIR"
-    export CPPFLAGS="-I/usr/local/opt/berkeley-db@4/include -I/usr/local/opt/qt@5/include -I$BOOST_INCLUDEDIR"
-    export PKG_CONFIG_PATH="/usr/local/opt/qt@5/lib/pkgconfig"
+    export LDFLAGS="-L/usr/local/opt/berkeley-db@4/lib -L/usr/local/opt/qt@5/lib -L$BOOST_LIBRARYDIR $LDFLAGS"
+    export CPPFLAGS="-I/usr/local/opt/berkeley-db@4/include -I/usr/local/opt/qt@5/include -I$BOOST_INCLUDEDIR $CPPFLAGS"
+    export PKG_CONFIG_PATH="/usr/local/opt/qt@5/lib/pkgconfig:$PKG_CONFIG_PATH"
 fi
+
+# Add Protobuf environment (safely appended)
+export PATH="$PROTOBUF_DIR/bin:$PATH"
+export LD_LIBRARY_PATH="$PROTOBUF_DIR/lib:$LD_LIBRARY_PATH"
+export PKG_CONFIG_PATH="$PROTOBUF_DIR/lib/pkgconfig:$PKG_CONFIG_PATH"
+export LDFLAGS="-L$PROTOBUF_DIR/lib $LDFLAGS"
+export CPPFLAGS="-I$PROTOBUF_DIR/include $CPPFLAGS"
+export PROTOC="$PROTOBUF_DIR/bin/protoc"
 
 export CXXFLAGS="-std=c++11"
 
