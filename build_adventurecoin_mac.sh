@@ -31,7 +31,37 @@ read -rp $'\nDo you want to create a .app and DMG for Qt Wallet? (y/n): ' MAKE_D
 # Dependencies
 # --------------------------
 echo -e "\n${GREEN}>>> Installing build dependencies via brew...${RESET}"
-brew install automake libtool berkeley-db@4 boost openssl libevent qt@5 protobuf qrencode miniupnpc zeromq pkg-config create-dmg
+brew install automake libtool berkeley-db@4 boost openssl libevent qt@5 qrencode miniupnpc zeromq pkg-config create-dmg
+
+# --------------------------
+# Install Protobuf 3.6.1 (Legacy compatible)
+# --------------------------
+PROTOBUF_DIR="$HOME/local/protobuf-3.6.1"
+PROTOBUF_TAR="protobuf-cpp-3.6.1.tar.gz"
+PROTOBUF_URL="https://github.com/protocolbuffers/protobuf/releases/download/v3.6.1/${PROTOBUF_TAR}"
+
+if [ ! -f "$PROTOBUF_DIR/bin/protoc" ]; then
+    echo -e "${GREEN}>>> Installing Protobuf 3.6.1 (compatible version)...${RESET}"
+    mkdir -p "$HOME/local"
+    cd /tmp
+    curl -LO "$PROTOBUF_URL"
+    tar -xvf "$PROTOBUF_TAR"
+    cd protobuf-3.6.1
+    ./configure --prefix="$PROTOBUF_DIR"
+    make -j"$(sysctl -n hw.logicalcpu)"
+    make install
+    echo -e "${CYAN}✔ Installed Protobuf 3.6.1 to $PROTOBUF_DIR${RESET}"
+else
+    echo -e "${CYAN}✔ Protobuf 3.6.1 already installed at $PROTOBUF_DIR${RESET}"
+fi
+
+# Set protobuf paths
+export PATH="$PROTOBUF_DIR/bin:$PATH"
+export LD_LIBRARY_PATH="$PROTOBUF_DIR/lib:$LD_LIBRARY_PATH"
+export PKG_CONFIG_PATH="$PROTOBUF_DIR/lib/pkgconfig:$PKG_CONFIG_PATH"
+export PROTOC="$PROTOBUF_DIR/bin/protoc"
+
+cd "$OLDPWD"
 
 # --------------------------
 # AdventureCoin source
