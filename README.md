@@ -1,7 +1,3 @@
-Here's your updated `README.md` with full macOS support info added, while preserving your original structure and tone:
-
----
-
 ## 🚀 AdventureCoin Build Scripts
 
 This interactive Bash script automates building AdventureCoin's daemon and Qt wallet on **Ubuntu-based systems** and **macOS**. It includes full support for advanced packaging, launcher creation, and Berkeley DB patching. Perfect for developers and users who want to build or distribute AdventureCoin with minimal effort.
@@ -106,7 +102,3 @@ chmod +x build_adventurecoin_mac.sh
 ```
 
 Just follow the prompts to customize your build. The script handles everything else!
-
----
-
-Let me know if you'd like me to auto-link the GitHub releases or add screenshots of the `.dmg` or `.deb` in action.
