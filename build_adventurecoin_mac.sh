@@ -90,6 +90,17 @@ EOF
 fi
 
 # --------------------------
+# GitHub Actions Env Export (if running in CI)
+# --------------------------
+if [ -n "$GITHUB_ENV" ]; then
+  echo "PKG_CONFIG_PATH=$PROTOBUF_DIR/lib/pkgconfig:\$PKG_CONFIG_PATH" >> "$GITHUB_ENV"
+  echo "LD_LIBRARY_PATH=$PROTOBUF_DIR/lib:\$LD_LIBRARY_PATH" >> "$GITHUB_ENV"
+  echo "LDFLAGS=-L$PROTOBUF_DIR/lib \$LDFLAGS" >> "$GITHUB_ENV"
+  echo "CPPFLAGS=-I$PROTOBUF_DIR/include \$CPPFLAGS" >> "$GITHUB_ENV"
+  echo "PATH=$PROTOBUF_DIR/bin:\$PATH" >> "$GITHUB_ENV"
+fi
+
+# --------------------------
 # Set protobuf paths
 # --------------------------
 export PATH="$PROTOBUF_DIR/bin:$PATH"
