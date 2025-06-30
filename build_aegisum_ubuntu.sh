@@ -11,7 +11,7 @@ BDB_PREFIX="$(pwd)/db4"
 COMPILED_DIR="$(pwd)/compiled_wallets"
 
 echo -e "${CYAN}============================="
-echo -e " AdventureCoin Ubuntu Builder"
+echo -e " Aegisum Ubuntu Builder"
 echo -e "=============================${RESET}"
 
 # 1. Build type
@@ -72,18 +72,19 @@ cd ../../
 
 
 # --------------------------
-# AdventureCoin source
+# Aegisum source
 # --------------------------
-if [ ! -d "AdventureCoin" ]; then
-    echo -e "${GREEN}>>> Cloning AdventureCoin...${RESET}"
-    git clone https://github.com/AdventureCoin-ADVC/AdventureCoin.git
+if [ ! -d "Aegisum" ]; then
+    echo -e "${GREEN}>>> Cloning Aegisum...${RESET}"
+    git clone https://github.com/Aegisum/aegisum-core.git
 else
-    echo -e "${GREEN}>>> Updating AdventureCoin...${RESET}"
-    cd AdventureCoin && git pull && cd ..
+    echo -e "${GREEN}>>> Updating Aegisum...${RESET}"
+    cd Aegisum && git pull && cd ..
 fi
 
-cd AdventureCoin
+cd Aegisum
 
+# This is for if you want it to use a specific branch
 # echo -e "${GREEN}>>> Checking out update-to-compile-2204-2404 branch...${RESET}"
 # git fetch origin
 # git checkout update-to-compile-2204-2404
@@ -106,10 +107,10 @@ make -j"$(nproc)"
 
 mkdir -p "$COMPILED_DIR"
 
-[[ "$BUILD_CHOICE" =~ [12] ]] && cp src/adventurecoind "$COMPILED_DIR/"
-[[ "$BUILD_CHOICE" =~ [12] ]] && cp src/adventurecoin-cli "$COMPILED_DIR/"
-[[ "$BUILD_CHOICE" =~ [12] ]] && cp src/adventurecoin-tx "$COMPILED_DIR/"
-[[ "$BUILD_CHOICE" =~ [23] ]] && cp src/qt/adventurecoin-qt "$COMPILED_DIR/"
+[[ "$BUILD_CHOICE" =~ [12] ]] && cp src/aegisumd "$COMPILED_DIR/"
+[[ "$BUILD_CHOICE" =~ [12] ]] && cp src/aegisum-cli "$COMPILED_DIR/"
+[[ "$BUILD_CHOICE" =~ [12] ]] && cp src/aegisum-tx "$COMPILED_DIR/"
+[[ "$BUILD_CHOICE" =~ [23] ]] && cp src/qt/aegisum-qt "$COMPILED_DIR/"
 
 # --------------------------
 # Strip Binaries
@@ -122,21 +123,21 @@ fi
 # --------------------------
 # .desktop shortcut
 # --------------------------
-if [[ "$DESKTOP_SHORTCUT" =~ ^[Yy]$ && -f "$COMPILED_DIR/adventurecoin-qt" ]]; then
+if [[ "$DESKTOP_SHORTCUT" =~ ^[Yy]$ && -f "$COMPILED_DIR/aegisum-qt" ]]; then
     echo -e "${GREEN}>>> Creating desktop shortcut...${RESET}"
     mkdir -p ~/.local/share/applications
-    cat <<EOF > ~/.local/share/applications/adventurecoin.desktop
+    cat <<EOF > ~/.local/share/applications/aegisum.desktop
 [Desktop Entry]
-Name=AdventureCoin Wallet
-Comment=Launch AdventureCoin Qt Wallet
-Exec=${COMPILED_DIR}/adventurecoin-qt
+Name=Aegisum Wallet
+Comment=Launch Aegisum Qt Wallet
+Exec=${COMPILED_DIR}/aegisum-qt
 Icon=wallet
 Terminal=false
 Type=Application
 Categories=Finance;
 EOF
-    chmod +x ~/.local/share/applications/adventurecoin.desktop
-    echo -e "${GREEN}✔ Desktop entry created at ~/.local/share/applications/adventurecoin.desktop${RESET}"
+    chmod +x ~/.local/share/applications/aegisum.desktop
+    echo -e "${GREEN}✔ Desktop entry created at ~/.local/share/applications/aegisum.desktop${RESET}"
 fi
 
 # --------------------------
@@ -145,29 +146,29 @@ fi
 if [[ "$DEB_PACKAGE" =~ ^[Yy]$ ]]; then
     echo -e "${GREEN}>>> Creating .deb package...${RESET}"
 
-    mkdir -p advc-deb/DEBIAN
-    mkdir -p advc-deb/usr/local/bin
+    mkdir -p aegs-deb/DEBIAN
+    mkdir -p aegs-deb/usr/local/bin
 
-    cat <<EOF > advc-deb/DEBIAN/control
-Package: adventurecoin
+    cat <<EOF > aegs-deb/DEBIAN/control
+Package: aegisum
 Version: 1.0
 Section: base
 Priority: optional
 Architecture: amd64
 Maintainer: Crypto Development Services
-Description: AdventureCoin Wallet Binaries
+Description: Aegisum Wallet Binaries
 EOF
 
-    cp "$COMPILED_DIR"/adventurecoind advc-deb/usr/local/bin/ 2>/dev/null || true
-    cp "$COMPILED_DIR"/adventurecoin-cli advc-deb/usr/local/bin/ 2>/dev/null || true
-    cp "$COMPILED_DIR"/adventurecoin-tx advc-deb/usr/local/bin/ 2>/dev/null || true
-    cp "$COMPILED_DIR"/adventurecoin-qt advc-deb/usr/local/bin/ 2>/dev/null || true
+    cp "$COMPILED_DIR"/aegisumd aegs-deb/usr/local/bin/ 2>/dev/null || true
+    cp "$COMPILED_DIR"/aegisum-cli aegs-deb/usr/local/bin/ 2>/dev/null || true
+    cp "$COMPILED_DIR"/aegisum-tx aegs-deb/usr/local/bin/ 2>/dev/null || true
+    cp "$COMPILED_DIR"/aegisum-qt aegs-deb/usr/local/bin/ 2>/dev/null || true
 
-    dpkg-deb --build advc-deb
-    mv advc-deb.deb "$COMPILED_DIR/adventurecoin_wallet.deb"
-    rm -rf advc-deb
+    dpkg-deb --build aegs-deb
+    mv aegs-deb.deb "$COMPILED_DIR/aegisum_wallet.deb"
+    rm -rf aegs-deb
 
-    echo -e "${GREEN}✔ .deb package created at $COMPILED_DIR/adventurecoin_wallet.deb${RESET}"
+    echo -e "${GREEN}✔ .deb package created at $COMPILED_DIR/aegisum_wallet.deb${RESET}"
 fi
 
 # --------------------------
@@ -175,8 +176,8 @@ fi
 # --------------------------
 if [[ "$TAR_PACKAGE" =~ ^[Yy]$ ]]; then
     echo -e "${GREEN}>>> Creating .tar.gz archive...${RESET}"
-    if tar --warning=no-file-changed -czf "$COMPILED_DIR/adventurecoin_wallet.tar.gz" -C "$COMPILED_DIR" .; then
-        echo -e "${GREEN}✔ .tar.gz created at $COMPILED_DIR/adventurecoin_wallet.tar.gz${RESET}"
+    if tar --warning=no-file-changed -czf "$COMPILED_DIR/aegisum_wallet.tar.gz" -C "$COMPILED_DIR" .; then
+        echo -e "${GREEN}✔ .tar.gz created at $COMPILED_DIR/aegisum_wallet.tar.gz${RESET}"
     else
         echo -e "${RED}✖ Failed to create .tar.gz archive${RESET}"
     fi
@@ -186,10 +187,10 @@ fi
 # --------------------------
 # Qt Wallet Launcher .deb with Icons
 # --------------------------
-if [[ "$QT_LAUNCHER_DEB" =~ ^[Yy]$ && -f "$COMPILED_DIR/adventurecoin-qt" ]]; then
+if [[ "$QT_LAUNCHER_DEB" =~ ^[Yy]$ && -f "$COMPILED_DIR/aegisum-qt" ]]; then
     echo -e "${GREEN}>>> Creating full Qt Wallet launcher .deb with icons...${RESET}"
 
-    wget -O advc_icon.png https://raw.githubusercontent.com/CryptoDevelopmentServices/Logos/main/advc.png
+    wget -O aegs_icon.png https://raw.githubusercontent.com/CryptoDevelopmentServices/Logos/main/aegs.png
 
     mkdir -p qt-launcher-deb/DEBIAN
     mkdir -p qt-launcher-deb/usr/local/bin
@@ -197,37 +198,37 @@ if [[ "$QT_LAUNCHER_DEB" =~ ^[Yy]$ && -f "$COMPILED_DIR/adventurecoin-qt" ]]; th
 
     for size in 16 32 48 64 128 256 512; do
         mkdir -p qt-launcher-deb/usr/share/icons/hicolor/${size}x${size}/apps
-        convert advc_icon.png -resize ${size}x${size} qt-launcher-deb/usr/share/icons/hicolor/${size}x${size}/apps/adventurecoin.png
+        convert aegs_icon.png -resize ${size}x${size} qt-launcher-deb/usr/share/icons/hicolor/${size}x${size}/apps/aegisum.png
     done
 
-    cat <<EOF > qt-launcher-deb/usr/share/applications/adventurecoin-qt.desktop
+    cat <<EOF > qt-launcher-deb/usr/share/applications/aegisum-qt.desktop
 [Desktop Entry]
-Name=AdventureCoin Wallet
-Comment=Launch the AdventureCoin Qt Wallet
-Exec=/usr/local/bin/adventurecoin-qt
-Icon=adventurecoin
+Name=Aegisum Wallet
+Comment=Launch the Aegisum Qt Wallet
+Exec=/usr/local/bin/aegisum-qt
+Icon=aegisum
 Terminal=false
 Type=Application
 Categories=Finance;
 EOF
 
     cat <<EOF > qt-launcher-deb/DEBIAN/control
-Package: adventurecoin-qt
+Package: aegisum-qt
 Version: 1.0
 Section: utils
 Priority: optional
 Architecture: amd64
 Maintainer: Crypto Development Services
-Description: AdventureCoin Qt Wallet launcher with full desktop integration and icons.
+Description: Aegisum Qt Wallet launcher with full desktop integration and icons.
 EOF
 
-    cp "$COMPILED_DIR/adventurecoin-qt" qt-launcher-deb/usr/local/bin/
+    cp "$COMPILED_DIR/aegisum-qt" qt-launcher-deb/usr/local/bin/
 
     dpkg-deb --build qt-launcher-deb
-    mv qt-launcher-deb.deb "$COMPILED_DIR/adventurecoin-qt-launcher.deb"
-    rm -rf qt-launcher-deb advc_icon.png
+    mv qt-launcher-deb.deb "$COMPILED_DIR/aegisum-qt-launcher.deb"
+    rm -rf qt-launcher-deb aegs_icon.png
 
-    echo -e "${GREEN}✔ Full Qt launcher .deb created at $COMPILED_DIR/adventurecoin-qt-launcher.deb${RESET}"
+    echo -e "${GREEN}✔ Full Qt launcher .deb created at $COMPILED_DIR/aegisum-qt-launcher.deb${RESET}"
 fi
 
 echo -e "\n${CYAN}Build complete! Binaries located in: ${COMPILED_DIR}${RESET}"

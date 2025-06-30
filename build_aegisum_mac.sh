@@ -23,7 +23,7 @@ BDB_PREFIX="$(pwd)/db4"
 COMPILED_DIR="$(pwd)/compiled_wallets_macos"
 
 echo -e "${CYAN}============================="
-echo -e " AdventureCoin macOS Builder"
+echo -e " Aegisum macOS Builder"
 echo -e "=============================${RESET}"
 
 # --------------------------
@@ -113,17 +113,17 @@ if [ -n "$GITHUB_ENV" ]; then
 fi
 
 # --------------------------
-# AdventureCoin source
+# Aegisum source
 # --------------------------
-if [ ! -d "AdventureCoin" ]; then
-    echo -e "${GREEN}>>> Cloning AdventureCoin...${RESET}"
-    git clone https://github.com/AdventureCoin-ADVC/AdventureCoin.git
+if [ ! -d "Aegisum" ]; then
+    echo -e "${GREEN}>>> Cloning Aegisum...${RESET}"
+    git clone https://github.com/Aegisum/aegisum-core.git
 else
-    echo -e "${GREEN}>>> Updating AdventureCoin...${RESET}"
-    cd AdventureCoin && git pull && cd ..
+    echo -e "${GREEN}>>> Updating Aegisum...${RESET}"
+    cd Aegisum && git pull && cd ..
 fi
 
-cd AdventureCoin
+cd Aegisum
 
 # --------------------------
 # Confirm Protobuf environment
@@ -204,26 +204,28 @@ export CXXFLAGS="-std=c++11"
 # --------------------------
 # Apply macOS Compatibility Patches
 # --------------------------
-echo -e "${GREEN}>>> Applying macOS compatibility patches...${RESET}"
 
-BOOST_FILES=("src/init.cpp" "src/torcontrol.cpp" "src/validation.cpp" "src/validationinterface.cpp" "src/scheduler.cpp")
-for FILE in "${BOOST_FILES[@]}"; do
-    if ! grep -q "BOOST_BIND_GLOBAL_PLACEHOLDERS" "$FILE"; then
-        sed -i.bak '1i\
-#define BOOST_BIND_GLOBAL_PLACEHOLDERS\
-' "$FILE"
-        echo -e "${CYAN}✔ Patched $FILE with BOOST_BIND_GLOBAL_PLACEHOLDERS${RESET}"
-    fi
-done
+# ---------------------------- UNCOMMENT ME IF NEEDED -----------------------------------------------
+# echo -e "${GREEN}>>> Applying macOS compatibility patches...${RESET}"
 
-PROTOCOL_CPP="rpc/protocol.cpp"
-if grep -q 'is_complete' "$PROTOCOL_CPP"; then
-    echo -e "${GREEN}>>> Patching deprecated is_complete() in $PROTOCOL_CPP...${RESET}"
-    sed -i.bak 's/\.is_complete()/\.is_absolute()/g' "$PROTOCOL_CPP"
-    echo -e "${CYAN}✔ Patched: .is_complete() → .is_absolute()${RESET}"
-else
-    echo -e "${CYAN}✔ No .is_complete() usage found in $PROTOCOL_CPP${RESET}"
-fi
+# BOOST_FILES=("src/init.cpp" "src/torcontrol.cpp" "src/validation.cpp" "src/validationinterface.cpp" "src/scheduler.cpp")
+# for FILE in "${BOOST_FILES[@]}"; do
+#     if ! grep -q "BOOST_BIND_GLOBAL_PLACEHOLDERS" "$FILE"; then
+#         sed -i.bak '1i\
+# #define BOOST_BIND_GLOBAL_PLACEHOLDERS\
+# ' "$FILE"
+#         echo -e "${CYAN}✔ Patched $FILE with BOOST_BIND_GLOBAL_PLACEHOLDERS${RESET}"
+#     fi
+# done
+
+# PROTOCOL_CPP="rpc/protocol.cpp"
+# if grep -q 'is_complete' "$PROTOCOL_CPP"; then
+#     echo -e "${GREEN}>>> Patching deprecated is_complete() in $PROTOCOL_CPP...${RESET}"
+#     sed -i.bak 's/\.is_complete()/\.is_absolute()/g' "$PROTOCOL_CPP"
+#     echo -e "${CYAN}✔ Patched: .is_complete() → .is_absolute()${RESET}"
+# else
+#     echo -e "${CYAN}✔ No .is_complete() usage found in $PROTOCOL_CPP${RESET}"
+# fi
 
 # --------------------------
 # Configure and Build
@@ -247,8 +249,8 @@ echo -e "${GREEN}>>> Starting make...${RESET}"
 make -j"$(sysctl -n hw.logicalcpu)"
 
 mkdir -p "$COMPILED_DIR"
-[[ "$BUILD_CHOICE" =~ [12] ]] && cp src/adventurecoind src/adventurecoin-cli src/adventurecoin-tx "$COMPILED_DIR/" 2>/dev/null || true
-[[ "$BUILD_CHOICE" =~ [23] ]] && cp src/qt/adventurecoin-qt "$COMPILED_DIR/" 2>/dev/null || true
+[[ "$BUILD_CHOICE" =~ [12] ]] && cp src/aegisumd src/aegisum-cli src/aegisum-tx "$COMPILED_DIR/" 2>/dev/null || true
+[[ "$BUILD_CHOICE" =~ [23] ]] && cp src/qt/aegisum-qt "$COMPILED_DIR/" 2>/dev/null || true
 
 # --------------------------
 # Strip Binaries
@@ -261,23 +263,23 @@ fi
 # --------------------------
 # .app Bundle and .dmg
 # --------------------------
-if [[ "$MAKE_DMG" =~ ^[Yy]$ && -f "$COMPILED_DIR/adventurecoin-qt" ]]; then
+if [[ "$MAKE_DMG" =~ ^[Yy]$ && -f "$COMPILED_DIR/aegisum-qt" ]]; then
     echo -e "${GREEN}>>> Creating .app bundle...${RESET}"
-    APP_BUNDLE_DIR="${COMPILED_DIR}/AdventureCoin-Qt.app"
+    APP_BUNDLE_DIR="${COMPILED_DIR}/Aegisum-Qt.app"
     mkdir -p "$APP_BUNDLE_DIR/Contents/MacOS" "$APP_BUNDLE_DIR/Contents/Resources"
 
-    cp "$COMPILED_DIR/adventurecoin-qt" "$APP_BUNDLE_DIR/Contents/MacOS/"
+    cp "$COMPILED_DIR/aegisum-qt" "$APP_BUNDLE_DIR/Contents/MacOS/"
     cat > "$APP_BUNDLE_DIR/Contents/Info.plist" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
   <key>CFBundleExecutable</key>
-  <string>adventurecoin-qt</string>
+  <string>aegisum-qt</string>
   <key>CFBundleIdentifier</key>
-  <string>com.adventurecoin.wallet</string>
+  <string>com.aegisum.wallet</string>
   <key>CFBundleName</key>
-  <string>AdventureCoin</string>
+  <string>Aegisum</string>
   <key>CFBundleVersion</key>
   <string>1.0</string>
   <key>CFBundlePackageType</key>
@@ -290,14 +292,14 @@ EOF
     macdeployqt "$APP_BUNDLE_DIR" || { echo -e "${RED}✖ macdeployqt failed. Ensure Qt is in PATH and compatible.${RESET}"; exit 1; }
 
     echo -e "${GREEN}>>> Creating DMG...${RESET}"
-    DMG_PATH="${COMPILED_DIR}/AdventureCoin-Wallet.dmg"
+    DMG_PATH="${COMPILED_DIR}/Aegisum-Wallet.dmg"
     create-dmg \
-      --volname "AdventureCoin Wallet" \
+      --volname "Aegisum Wallet" \
       --window-pos 200 120 \
       --window-size 600 300 \
       --icon-size 100 \
-      --icon "AdventureCoin-Qt.app" 175 120 \
-      --hide-extension "AdventureCoin-Qt.app" \
+      --icon "Aegisum-Qt.app" 175 120 \
+      --hide-extension "Aegisum-Qt.app" \
       --app-drop-link 425 120 \
       "$DMG_PATH" \
       "$COMPILED_DIR"
