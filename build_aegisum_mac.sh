@@ -118,6 +118,7 @@ fi
 if [ ! -d "Aegisum" ]; then
     echo -e "${GREEN}>>> Cloning Aegisum...${RESET}"
     git clone https://github.com/Aegisum/aegisum-core.git
+    mv aegisum-core Aegisum
 else
     echo -e "${GREEN}>>> Updating Aegisum...${RESET}"
     cd Aegisum && git pull && cd ..
