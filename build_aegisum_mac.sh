@@ -172,38 +172,44 @@ fi
 # --------------------------
 # Set environment paths
 # --------------------------
-if [[ "$(uname -m)" == "arm64" ]]; then
+ARCH=$(uname -m)
+
+if [[ "$ARCH" == "arm64" ]]; then
     echo -e "${CYAN}✔ Detected Apple Silicon (arm64)${RESET}"
-    export PATH="/opt/homebrew/opt/berkeley-db@4/bin:/opt/homebrew/opt/qt@5/bin:$PATH"
-    export BOOST_ROOT="/opt/homebrew/opt/boost"
-    export BOOST_INCLUDEDIR="$BOOST_ROOT/include"
-    export BOOST_LIBRARYDIR="$BOOST_ROOT/lib"
-    export LDFLAGS="-L/opt/homebrew/opt/berkeley-db@4/lib -L/opt/homebrew/opt/qt@5/lib -L$BOOST_LIBRARYDIR $LDFLAGS"
-    export CPPFLAGS="-I/opt/homebrew/opt/berkeley-db@4/include -I/opt/homebrew/opt/qt@5/include -I$BOOST_INCLUDEDIR $CPPFLAGS"
-    export PKG_CONFIG_PATH="/opt/homebrew/opt/qt@5/lib/pkgconfig:$PKG_CONFIG_PATH"
+    BREDB_PATH="/opt/homebrew/opt/berkeley-db@4"
+    QT_PATH="/opt/homebrew/opt/qt@5"
+    BOOST_PATH="/opt/homebrew/opt/boost"
+    FMT_PATH="/opt/homebrew/opt/fmt"
 else
     echo -e "${CYAN}✔ Detected Intel macOS${RESET}"
-    export PATH="/usr/local/opt/berkeley-db@4/bin:/usr/local/opt/qt@5/bin:$PATH"
-    export BOOST_ROOT="/usr/local/opt/boost"
-    export BOOST_INCLUDEDIR="$BOOST_ROOT/include"
-    export BOOST_LIBRARYDIR="$BOOST_ROOT/lib"
-    export LDFLAGS="-L/usr/local/opt/berkeley-db@4/lib -L/usr/local/opt/qt@5/lib -L$BOOST_LIBRARYDIR $LDFLAGS"
-    export CPPFLAGS="-I/usr/local/opt/berkeley-db@4/include -I/usr/local/opt/qt@5/include -I$BOOST_INCLUDEDIR $CPPFLAGS"
-    export PKG_CONFIG_PATH="/usr/local/opt/qt@5/lib/pkgconfig:$PKG_CONFIG_PATH"
+    BREDB_PATH="/usr/local/opt/berkeley-db@4"
+    QT_PATH="/usr/local/opt/qt@5"
+    BOOST_PATH="/usr/local/opt/boost"
+    FMT_PATH="/usr/local/opt/fmt"
 fi
 
-# Add Protobuf environment (safely appended)
-export PATH="$PROTOBUF_DIR/bin:$PATH"
-export LD_LIBRARY_PATH="$PROTOBUF_DIR/lib:$LD_LIBRARY_PATH"
-export PKG_CONFIG_PATH="$PROTOBUF_DIR/lib/pkgconfig:$PKG_CONFIG_PATH"
-export LDFLAGS="-L$PROTOBUF_DIR/lib $LDFLAGS"
-export CPPFLAGS="-I$PROTOBUF_DIR/include $CPPFLAGS"
-export PROTOC="$PROTOBUF_DIR/bin/protoc"
+export PATH="$BREDB_PATH/bin:$QT_PATH/bin:$PATH"
+export BOOST_ROOT="$BOOST_PATH"
+export BOOST_INCLUDEDIR="$BOOST_PATH/include"
+export BOOST_LIBRARYDIR="$BOOST_PATH/lib"
+export LDFLAGS="-L$BREDB_PATH/lib -L$QT_PATH/lib -L$BOOST_PATH/lib -L$FMT_PATH/lib $LDFLAGS"
+export CPPFLAGS="-I$BREDB_PATH/include -I$QT_PATH/include -I$BOOST_PATH/include -I$FMT_PATH/include $CPPFLAGS"
+export PKG_CONFIG_PATH="$QT_PATH/lib/pkgconfig:$FMT_PATH/lib/pkgconfig:$PKG_CONFIG_PATH"
 
-# export CXXFLAGS="-std=c++11"
+# Protobuf, assuming PROTOBUF_DIR is defined externally
+if [[ -n "$PROTOBUF_DIR" ]]; then
+    export PATH="$PROTOBUF_DIR/bin:$PATH"
+    export LD_LIBRARY_PATH="$PROTOBUF_DIR/lib:$LD_LIBRARY_PATH"
+    export PKG_CONFIG_PATH="$PROTOBUF_DIR/lib/pkgconfig:$PKG_CONFIG_PATH"
+    export LDFLAGS="-L$PROTOBUF_DIR/lib $LDFLAGS"
+    export CPPFLAGS="-I$PROTOBUF_DIR/include $CPPFLAGS"
+    export PROTOC="$PROTOBUF_DIR/bin/protoc"
+fi
+
 export CC=clang
 export CXX=clang++
 export CXXFLAGS="-std=c++14"
+
 
 # --------------------------
 # Apply macOS Compatibility Patches
