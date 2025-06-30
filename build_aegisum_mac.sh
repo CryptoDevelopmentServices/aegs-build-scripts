@@ -208,7 +208,7 @@ fi
 
 export CC=clang
 export CXX=clang++
-export CXXFLAGS="-std=c++14"
+export CXXFLAGS="-std=c++14 -Wno-deprecated-builtins"
 
 
 # --------------------------
