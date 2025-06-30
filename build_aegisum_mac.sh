@@ -192,6 +192,7 @@ export PATH="$BREDB_PATH/bin:$QT_PATH/bin:$PATH"
 export BOOST_ROOT="$BOOST_PATH"
 export BOOST_INCLUDEDIR="$BOOST_PATH/include"
 export BOOST_LIBRARYDIR="$BOOST_PATH/lib"
+echo -e "${CYAN}✔ BOOST_LIBRARYDIR set to: $BOOST_LIBRARYDIR${RESET}"
 export LDFLAGS="-L$BREDB_PATH/lib -L$QT_PATH/lib -L$BOOST_PATH/lib -L$FMT_PATH/lib $LDFLAGS"
 export CPPFLAGS="-I$BREDB_PATH/include -I$QT_PATH/include -I$BOOST_PATH/include -I$FMT_PATH/include $CPPFLAGS"
 export PKG_CONFIG_PATH="$QT_PATH/lib/pkgconfig:$FMT_PATH/lib/pkgconfig:$PKG_CONFIG_PATH"
@@ -209,6 +210,10 @@ fi
 export CC=clang
 export CXX=clang++
 export CXXFLAGS="-std=c++14 -Wno-deprecated-builtins"
+
+export LDFLAGS="$(echo "$LDFLAGS" | sed 's|/opt/local[^ ]*||g')"
+export CPPFLAGS="$(echo "$CPPFLAGS" | sed 's|/opt/local[^ ]*||g')"
+
 
 
 # --------------------------
@@ -246,6 +251,10 @@ echo -e "${GREEN}>>> Running autogen.sh...${RESET}"
 chmod +x share/genbuild.sh autogen.sh
 ./autogen.sh
 
+echo -e "${CYAN}>>> Cleaning previous build config...${RESET}"
+make distclean || true
+
+
 echo -e "${GREEN}>>> Running configure with args: $CONFIGURE_ARGS${RESET}"
 if [[ "$BUILD_CHOICE" == "1" ]]; then
     ./configure $CONFIGURE_ARGS --without-gui
@@ -254,6 +263,9 @@ elif [[ "$BUILD_CHOICE" == "2" ]]; then
 elif [[ "$BUILD_CHOICE" == "3" ]]; then
     ./configure $CONFIGURE_ARGS --disable-wallet --with-gui=qt5
 fi
+
+echo -e "${CYAN}>>> Verifying Boost link target...${RESET}"
+grep boost config.log | grep "$BOOST_LIBRARYDIR" || echo -e "${RED}⚠ Boost may not have been picked up from $BOOST_LIBRARYDIR${RESET}"
 
 echo -e "${GREEN}>>> Starting make...${RESET}"
 make -j"$(sysctl -n hw.logicalcpu)"
@@ -316,5 +328,11 @@ EOF
 
     echo -e "${GREEN}✔ DMG created at: $DMG_PATH${RESET}"
 fi
+
+if [[ -f "$COMPILED_DIR/aegisum-cli" ]]; then
+    echo -e "${CYAN}>>> Linked libraries in aegisum-cli:${RESET}"
+    otool -L "$COMPILED_DIR/aegisum-cli" | grep boost || echo -e "${RED}⚠ Boost not linked properly.${RESET}"
+fi
+
 
 echo -e "\n${CYAN}✔ Build complete! Binaries in: ${COMPILED_DIR}${RESET}"
