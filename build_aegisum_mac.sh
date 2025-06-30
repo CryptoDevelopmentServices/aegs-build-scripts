@@ -200,7 +200,10 @@ export LDFLAGS="-L$PROTOBUF_DIR/lib $LDFLAGS"
 export CPPFLAGS="-I$PROTOBUF_DIR/include $CPPFLAGS"
 export PROTOC="$PROTOBUF_DIR/bin/protoc"
 
-export CXXFLAGS="-std=c++11"
+# export CXXFLAGS="-std=c++11"
+export CC=clang
+export CXX=clang++
+export CXXFLAGS="-std=c++14"
 
 # --------------------------
 # Apply macOS Compatibility Patches
