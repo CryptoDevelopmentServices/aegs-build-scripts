@@ -117,7 +117,7 @@ fi
 # --------------------------
 if [ ! -d "Aegisum" ]; then
     echo -e "${GREEN}>>> Cloning Aegisum...${RESET}"
-    git clone https://github.com/Aegisum/aegisum-core.git
+    git clone https://github.com/CryptoDevelopmentServices/aegisum-core.git #temp url
     mv aegisum-core Aegisum
 else
     echo -e "${GREEN}>>> Updating Aegisum...${RESET}"
