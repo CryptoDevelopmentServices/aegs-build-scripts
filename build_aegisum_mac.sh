@@ -196,12 +196,14 @@ if [[ "$ARCH" == "arm64" ]]; then
     QT_PATH="/opt/homebrew/opt/qt@5"
     BOOST_PATH="/opt/homebrew/opt/boost"
     FMT_PATH="/opt/homebrew/opt/fmt"
+    LIBEVENT_PATH="/opt/homebrew/opt/libevent"
 else
     echo -e "${CYAN}✔ Detected Intel macOS${RESET}"
     BREDB_PATH="/usr/local/opt/berkeley-db@4"
     QT_PATH="/usr/local/opt/qt@5"
     BOOST_PATH="/usr/local/opt/boost"
     FMT_PATH="/usr/local/opt/fmt"
+    LIBEVENT_PATH="/usr/local/opt/libevent"
 fi
 
 export PATH="$BREDB_PATH/bin:$QT_PATH/bin:$PATH"
@@ -209,9 +211,9 @@ export BOOST_ROOT="$BOOST_PATH"
 export BOOST_INCLUDEDIR="$BOOST_PATH/include"
 export BOOST_LIBRARYDIR="$BOOST_PATH/lib"
 echo -e "${CYAN}✔ BOOST_LIBRARYDIR set to: $BOOST_LIBRARYDIR${RESET}"
-export LDFLAGS="-L$BREDB_PATH/lib -L$QT_PATH/lib -L$BOOST_PATH/lib -L$FMT_PATH/lib $LDFLAGS"
-export CPPFLAGS="-I$BREDB_PATH/include -I$QT_PATH/include -I$BOOST_PATH/include -I$FMT_PATH/include $CPPFLAGS"
-export PKG_CONFIG_PATH="$QT_PATH/lib/pkgconfig:$FMT_PATH/lib/pkgconfig:$PKG_CONFIG_PATH"
+export LDFLAGS="-L$BREDB_PATH/lib -L$QT_PATH/lib -L$BOOST_PATH/lib -L$FMT_PATH/lib -L$LIBEVENT_PATH/lib $LDFLAGS"
+export CPPFLAGS="-I$BREDB_PATH/include -I$QT_PATH/include -I$BOOST_PATH/include -I$FMT_PATH/include -I$LIBEVENT_PATH/include $CPPFLAGS"
+export PKG_CONFIG_PATH="$QT_PATH/lib/pkgconfig:$FMT_PATH/lib/pkgconfig:$LIBEVENT_PATH/lib/pkgconfig:$PKG_CONFIG_PATH"
 
 # Protobuf
 if [[ -n "$PROTOBUF_DIR" ]]; then
