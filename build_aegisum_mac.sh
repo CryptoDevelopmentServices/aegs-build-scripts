@@ -208,7 +208,7 @@ if [[ -n "$PROTOBUF_DIR" ]]; then
 fi
 
 # 🛠️ Critical fix for Boost linking
-export LIBS="-lboost_system -lboost_filesystem"
+export LIBS="$LIBS -lboost_filesystem -lboost_system"
 
 export CC=clang
 export CXX=clang++
@@ -220,7 +220,7 @@ export CPPFLAGS="$(echo "$CPPFLAGS" | sed 's|/opt/local[^ ]*||g')"
 # --------------------------
 # Configure and Build
 # --------------------------
-CONFIGURE_ARGS="--with-incompatible-bdb --with-boost-libdir=$BOOST_LIBRARYDIR --with-protobuf=$PROTOBUF_DIR"
+CONFIGURE_ARGS="--with-incompatible-bdb --with-boost-libdir=$BOOST_LIBRARYDIR --with-protobuf=$PROTOBUF_DIR LIBS='-lboost_filesystem -lboost_system'"
 
 echo -e "${GREEN}>>> Running autogen.sh...${RESET}"
 chmod +x share/genbuild.sh autogen.sh
