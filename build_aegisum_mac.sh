@@ -132,8 +132,11 @@ cd Aegisum
 echo -e "${GREEN}>>> Patching Boost copy_option -> copy_options in wallet/bdb.cpp...${RESET}"
 BDB_CPP_FILE="wallet/bdb.cpp"
 if grep -q "fs::copy_file.*copy_option::overwrite_if_exists" "$BDB_CPP_FILE"; then
-  sed -i '' 's/fs::copy_option::overwrite_if_exists/fs::copy_options::overwrite_existing/g' "$BDB_CPP_FILE"
-  echo -e "${CYAN}✔ Patched $BDB_CPP_FILE${RESET}"
+  sed -i '' \
+    -e 's/fs::copy_option::overwrite_if_exists/fs::copy_options::overwrite_existing/g' \
+    -e 's/fs::copy_option/fs::copy_options/g' \
+    "$BDB_CPP_FILE"
+  echo -e "${CYAN}✔ Fully patched $BDB_CPP_FILE (namespace + enum)${RESET}"
 else
   echo -e "${CYAN}✔ No patch needed for $BDB_CPP_FILE${RESET}"
 fi
