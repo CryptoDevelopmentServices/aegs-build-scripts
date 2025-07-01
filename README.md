@@ -1,5 +1,5 @@
 ## 🚀 Aegisum Build Scripts
-
+ 
 This interactive Bash script automates building Aegisum's daemon and Qt wallet on **Ubuntu-based systems** and **macOS**. It includes full support for advanced packaging, launcher creation, and Berkeley DB patching. Perfect for developers and users who want to build or distribute Aegisum with minimal effort.
 
 # aegs-build-scripts
