@@ -54,7 +54,7 @@ export PATH="/usr/local/bin:/opt/homebrew/bin:$PATH"
 # Dependencies
 # --------------------------
 echo -e "\n${GREEN}>>> Installing build dependencies via brew...${RESET}"
-brew install automake libtool berkeley-db@4 boost openssl libevent qt@5 qrencode miniupnpc zeromq pkg-config create-dmg
+brew install automake libtool berkeley-db@4 boost openssl libevent qt@5 qrencode miniupnpc zeromq pkg-config create-dmg fmt
 
 # --------------------------
 # Install Protobuf 3.6.1 (Legacy compatible)
@@ -213,34 +213,6 @@ export CXXFLAGS="-std=c++14 -Wno-deprecated-builtins"
 
 export LDFLAGS="$(echo "$LDFLAGS" | sed 's|/opt/local[^ ]*||g')"
 export CPPFLAGS="$(echo "$CPPFLAGS" | sed 's|/opt/local[^ ]*||g')"
-
-
-
-# --------------------------
-# Apply macOS Compatibility Patches
-# --------------------------
-
-# ---------------------------- UNCOMMENT ME IF NEEDED -----------------------------------------------
-# echo -e "${GREEN}>>> Applying macOS compatibility patches...${RESET}"
-
-# BOOST_FILES=("src/init.cpp" "src/torcontrol.cpp" "src/validation.cpp" "src/validationinterface.cpp" "src/scheduler.cpp")
-# for FILE in "${BOOST_FILES[@]}"; do
-#     if ! grep -q "BOOST_BIND_GLOBAL_PLACEHOLDERS" "$FILE"; then
-#         sed -i.bak '1i\
-# #define BOOST_BIND_GLOBAL_PLACEHOLDERS\
-# ' "$FILE"
-#         echo -e "${CYAN}✔ Patched $FILE with BOOST_BIND_GLOBAL_PLACEHOLDERS${RESET}"
-#     fi
-# done
-
-# PROTOCOL_CPP="rpc/protocol.cpp"
-# if grep -q 'is_complete' "$PROTOCOL_CPP"; then
-#     echo -e "${GREEN}>>> Patching deprecated is_complete() in $PROTOCOL_CPP...${RESET}"
-#     sed -i.bak 's/\.is_complete()/\.is_absolute()/g' "$PROTOCOL_CPP"
-#     echo -e "${CYAN}✔ Patched: .is_complete() → .is_absolute()${RESET}"
-# else
-#     echo -e "${CYAN}✔ No .is_complete() usage found in $PROTOCOL_CPP${RESET}"
-# fi
 
 # --------------------------
 # Configure and Build
