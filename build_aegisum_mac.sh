@@ -197,7 +197,7 @@ export LDFLAGS="-L$BREDB_PATH/lib -L$QT_PATH/lib -L$BOOST_PATH/lib -L$FMT_PATH/l
 export CPPFLAGS="-I$BREDB_PATH/include -I$QT_PATH/include -I$BOOST_PATH/include -I$FMT_PATH/include $CPPFLAGS"
 export PKG_CONFIG_PATH="$QT_PATH/lib/pkgconfig:$FMT_PATH/lib/pkgconfig:$PKG_CONFIG_PATH"
 
-# Protobuf, assuming PROTOBUF_DIR is defined externally
+# Protobuf
 if [[ -n "$PROTOBUF_DIR" ]]; then
     export PATH="$PROTOBUF_DIR/bin:$PATH"
     export LD_LIBRARY_PATH="$PROTOBUF_DIR/lib:$LD_LIBRARY_PATH"
@@ -206,6 +206,9 @@ if [[ -n "$PROTOBUF_DIR" ]]; then
     export CPPFLAGS="-I$PROTOBUF_DIR/include $CPPFLAGS"
     export PROTOC="$PROTOBUF_DIR/bin/protoc"
 fi
+
+# 🛠️ Critical fix for Boost linking
+export LIBS="-lboost_system -lboost_filesystem"
 
 export CC=clang
 export CXX=clang++
