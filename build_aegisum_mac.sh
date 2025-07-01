@@ -218,6 +218,23 @@ export LDFLAGS="$(echo "$LDFLAGS" | sed 's|/opt/local[^ ]*||g')"
 export CPPFLAGS="$(echo "$CPPFLAGS" | sed 's|/opt/local[^ ]*||g')"
 
 # --------------------------
+# Patch Boost filesystem API (overwrite_if_exists -> overwrite_existing)
+# --------------------------
+echo -e "${GREEN}>>> Patching Boost copy_option -> copy_options in wallet/bdb.cpp...${RESET}"
+BDB_CPP_FILE="wallet/bdb.cpp"
+if grep -q "fs::copy_file.*copy_option::overwrite_if_exists" "$BDB_CPP_FILE"; then
+  sed -i '' 's/fs::copy_option::overwrite_if_exists/fs::copy_options::overwrite_existing/g' "$BDB_CPP_FILE"
+  echo -e "${CYAN}✔ Patched $BDB_CPP_FILE${RESET}"
+else
+  echo -e "${CYAN}✔ No patch needed for $BDB_CPP_FILE${RESET}"
+fi
+
+# --------------------------
+# Remove unsupported Clang flags
+# --------------------------
+export CXXFLAGS="$(echo "$CXXFLAGS" | sed 's/-fstack-clash-protection//g')"
+
+# --------------------------
 # Configure and Build
 # --------------------------
 CONFIGURE_ARGS="--with-incompatible-bdb --with-boost-libdir=$BOOST_LIBRARYDIR --with-protobuf=$PROTOBUF_DIR"
