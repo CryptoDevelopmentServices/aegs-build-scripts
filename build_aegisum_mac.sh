@@ -220,15 +220,16 @@ export CPPFLAGS="$(echo "$CPPFLAGS" | sed 's|/opt/local[^ ]*||g')"
 # --------------------------
 # Configure and Build
 # --------------------------
-CONFIGURE_ARGS="--with-incompatible-bdb --with-boost-libdir=$BOOST_LIBRARYDIR --with-protobuf=$PROTOBUF_DIR LIBS='-lboost_filesystem -lboost_system'"
+CONFIGURE_ARGS="--with-incompatible-bdb --with-boost-libdir=$BOOST_LIBRARYDIR --with-protobuf=$PROTOBUF_DIR"
 
 echo -e "${GREEN}>>> Running autogen.sh...${RESET}"
 chmod +x share/genbuild.sh autogen.sh
 ./autogen.sh
 
 echo -e "${CYAN}>>> Cleaning previous build config...${RESET}"
-make distclean || true
-
+if [ -f Makefile ]; then
+    make distclean || true
+fi
 
 echo -e "${GREEN}>>> Running configure with args: $CONFIGURE_ARGS${RESET}"
 if [[ "$BUILD_CHOICE" == "1" ]]; then
