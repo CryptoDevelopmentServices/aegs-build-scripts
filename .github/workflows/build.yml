@@ -45,8 +45,8 @@ jobs:
 
       - name: Make Scripts Executable
         run: |
-          chmod +x ./build_adventurecoin_ubuntu.sh
-          chmod +x ./build_adventurecoin_mac.sh
+          chmod +x ./build_aegisum_ubuntu.sh
+          chmod +x ./build_aegisum_mac.sh
 
       # Ubuntu specific steps
       - name: Install Dependencies (Ubuntu)
